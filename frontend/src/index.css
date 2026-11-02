@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --color-bg-primary: #f8fafc;
+    --color-bg-surface: #ffffff;
+    --color-border: #e2e8f0;
+  }
+
+  .dark {
+    --color-bg-primary: #020617;
+    --color-bg-surface: #0f172a;
+    --color-border: #1e293b;
+  }
+
+  * {
+    border-color: var(--color-border);
+  }
+}
+
+/* Custom scrollbars for clean enterprise UI */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.45);
+}
+
+/* Responsive Touch & Mobile Utilities */
+@media (max-width: 640px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  html {
+    font-size: 15px;
+  }
+}
