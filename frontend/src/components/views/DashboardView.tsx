@@ -1,21 +1,21 @@
 import React from 'react';
-import { 
-  DollarSign, 
-  FileText, 
-  Layers, 
-  Truck, 
-  Clock, 
-  ChevronRight, 
-  Building2, 
-  ArrowRight,
-  ShieldCheck,
-  CheckCircle2
-} from 'lucide-react';
 import { useProcurement } from '../../context/ProcurementContext';
 import { StatCard } from '../common/StatCard';
 import { Badge } from '../common/Badge';
 import { Button } from '../common/Button';
 import { formatCurrency } from '../../config';
+import { 
+  DollarSign, 
+  Clock, 
+  Layers, 
+  Truck, 
+  FileText, 
+  Building2, 
+  ChevronRight,
+  TrendingUp,
+  ShieldCheck,
+  CheckCircle2
+} from 'lucide-react';
 
 interface DashboardViewProps {
   onOpenCreatePR: () => void;
@@ -26,16 +26,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onOpenCreatePR }) 
     purchaseRequests, 
     rfqs, 
     purchaseOrders, 
+    deliveries, 
     vendors, 
+    approvePurchaseRequest, 
     role, 
-    setActiveView,
-    approvePurchaseRequest 
+    setActiveView 
   } = useProcurement();
 
-  // Metrics calculation
-  const totalSpend = purchaseOrders.reduce((sum, po) => sum + po.totalAmount, 0) + 720000;
+  const totalSpend = purchaseOrders.reduce((sum, po) => sum + po.totalAmount, 0);
   const pendingRequests = purchaseRequests.filter(
-    (p) => p.status === 'pending_dept_approval' || p.status === 'pending_procurement_review'
+    (pr) => pr.status === 'pending_dept_approval' || pr.status === 'pending_procurement_review'
   );
   const activeRfqs = rfqs.filter((r) => r.status === 'open' || r.status === 'evaluating');
   const avgOnTime = (
@@ -50,24 +50,24 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onOpenCreatePR }) 
     { name: '4. Quotation Evaluation', count: activeRfqs.length, view: 'quotations' },
     { name: '5. Vendor Selection', count: 2, view: 'quotations' },
     { name: '6. Purchase Order', count: purchaseOrders.length, view: 'orders' },
-    { name: '7. Delivery Tracking', count: 1, view: 'deliveries' },
-    { name: '8. 3-Way Match & Close', count: 1, view: 'deliveries' },
+    { name: '7. Delivery Tracking', count: deliveries.length, view: 'deliveries' },
+    { name: '8. 3-Way Match & Close', count: deliveries.filter(d => d.qcPassed).length, view: 'deliveries' },
   ];
 
   return (
     <div className="procurement-overview w-full max-w-full overflow-x-hidden space-y-4 sm:space-y-6">
       {/* Welcome Banner */}
-      <div className="overview-hero-banner bg-gradient-to-r from-blue-50 via-indigo-50/40 to-white dark:from-slate-900 dark:via-slate-900 dark:to-blue-950/40 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 relative overflow-hidden shadow-xs">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5 sm:gap-4">
+      <div className="overview-hero-banner bg-gradient-to-r from-blue-50 via-indigo-50/40 to-white dark:from-slate-900 dark:via-slate-900 dark:to-blue-950/40 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 md:p-6 relative overflow-hidden shadow-xs">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4">
           <div className="space-y-1 sm:space-y-1.5 min-w-0">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 mb-0.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 animate-pulse" />
-              Enterprise Procurement Command Center
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 mb-0.5 max-w-full">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 animate-pulse shrink-0" />
+              <span className="truncate">Enterprise Procurement Command Center</span>
             </div>
-            <h2 className="text-base sm:text-xl lg:text-2xl font-bold text-slate-900 dark:text-white tracking-tight break-words">
+            <h2 className="text-base sm:text-xl lg:text-2xl font-bold text-slate-900 dark:text-white tracking-tight break-words leading-snug">
               Centralized Sourcing, Approval & Logistics Management
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed break-words">
               Real-time oversight over purchase requisitions, supplier competitive bidding, multi-tier authorizations, and automated 3-way matching.
             </p>
           </div>
@@ -77,7 +77,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onOpenCreatePR }) 
               variant="secondary"
               size="md"
               onClick={() => setActiveView('requests')}
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto justify-center min-h-[38px] text-xs font-semibold"
             >
               View Requisitions
             </Button>
@@ -85,7 +85,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onOpenCreatePR }) 
               variant="primary"
               size="md"
               onClick={onOpenCreatePR}
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto justify-center min-h-[38px] text-xs font-semibold"
             >
               + Create New PR
             </Button>
@@ -93,48 +93,48 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onOpenCreatePR }) 
         </div>
       </div>
 
-      {/* KPI Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+      {/* KPI Cards Grid (High Density 2x2 on Mobile, 4-col on Desktop) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         <StatCard
-          title="Procurement Spend (YTD)"
+          title="Spend (YTD)"
           value={formatCurrency(totalSpend)}
-          change="+14.2% vs Q3"
+          change="+14.2%"
           isPositive={true}
-          subtitle="Direct & Indirect Capex/Opex"
-          icon={<DollarSign className="w-4 h-4 sm:w-5 sm:h-5" />}
+          subtitle="Direct Capex/Opex"
+          icon={<DollarSign className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
           iconColor="text-emerald-700 bg-emerald-50 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-500/10 dark:border-emerald-500/20"
         />
         <StatCard
           title="Pending Approvals"
           value={pendingRequests.length.toString()}
-          change={pendingRequests.length > 0 ? 'Action Required' : 'All Clear'}
+          change={pendingRequests.length > 0 ? 'Action Req.' : 'All Clear'}
           isPositive={pendingRequests.length === 0}
-          subtitle="Department & Finance Queues"
-          icon={<Clock className="w-4 h-4 sm:w-5 sm:h-5" />}
+          subtitle="Department Queue"
+          icon={<Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
           iconColor="text-amber-700 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-500/10 dark:border-amber-500/20"
         />
         <StatCard
-          title="Active RFQ Tenders"
+          title="Active RFQs"
           value={activeRfqs.length.toString()}
-          change="3 Bids In Review"
+          change="3 Bids Live"
           isPositive={true}
-          subtitle="Competitive Quotation Stage"
-          icon={<Layers className="w-4 h-4 sm:w-5 sm:h-5" />}
+          subtitle="Tender Stage"
+          icon={<Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
           iconColor="text-blue-700 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-500/10 dark:border-blue-500/20"
         />
         <StatCard
-          title="On-Time Delivery Rate"
+          title="On-Time Delivery"
           value={`${avgOnTime}%`}
           change="+2.4% SLA"
           isPositive={true}
-          subtitle="Across 4 Qualified Suppliers"
-          icon={<Truck className="w-4 h-4 sm:w-5 sm:h-5" />}
+          subtitle="Across 4 Suppliers"
+          icon={<Truck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
           iconColor="text-indigo-700 bg-indigo-50 border-indigo-200 dark:text-indigo-400 dark:bg-indigo-500/10 dark:border-indigo-500/20"
         />
       </div>
 
       {/* Interactive Enterprise Workflow Visualizer */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 sm:p-5 space-y-3 sm:space-y-4 shadow-xs">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 sm:p-5 space-y-2.5 sm:space-y-4 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
           <div>
             <h3 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white tracking-tight flex items-center gap-1.5">
@@ -145,7 +145,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onOpenCreatePR }) 
               Interactive end-to-end workflow stages as defined in the Adz4needz enterprise assignment.
             </p>
           </div>
-          <span className="text-[11px] sm:text-xs text-blue-600 dark:text-blue-400 font-medium self-start sm:self-auto">
+          <span className="text-[10px] sm:text-xs text-blue-600 dark:text-blue-400 font-medium self-start sm:self-auto">
             Swipe or Click to Filter ➔
           </span>
         </div>
@@ -174,7 +174,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onOpenCreatePR }) 
       </div>
 
       {/* Two Column Layout: Action Items & Top Suppliers */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5 sm:gap-6">
         {/* Left: Pending Requisitions requiring review */}
         <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 sm:p-5 space-y-3 sm:space-y-4 shadow-xs min-w-0">
           <div className="flex items-center justify-between gap-2">
@@ -224,6 +224,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onOpenCreatePR }) 
                         size="sm"
                         variant="primary"
                         onClick={() => approvePurchaseRequest(pr.id)}
+                        className="text-xs min-h-[34px] px-2.5"
                       >
                         Approve
                       </Button>
@@ -231,6 +232,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onOpenCreatePR }) 
                         size="sm"
                         variant="secondary"
                         onClick={() => setActiveView('requests')}
+                        className="text-xs min-h-[34px] px-2.5"
                       >
                         Details
                       </Button>

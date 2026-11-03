@@ -141,9 +141,13 @@
 
 /* 3. Extra Small Screens (<= 380px) */
 @media screen and (max-width: 380px) {
+  .overview-hero-banner {
+    padding: 0.75rem 0.875rem !important;
+  }
+
   .overview-pipeline-step {
-    flex: 0 0 130px !important;
-    min-width: 130px !important;
+    flex: 0 0 120px !important;
+    min-width: 120px !important;
     padding: 0.5rem !important;
   }
 
