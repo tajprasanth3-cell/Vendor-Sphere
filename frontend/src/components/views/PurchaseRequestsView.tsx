@@ -162,45 +162,102 @@ export const PurchaseRequestsView: React.FC<PurchaseRequestsViewProps> = ({ onOp
                       </p>
                     </div>
 
-                    {/* Line Items Table with Responsive Scroll & Swipe Hint */}
-                    <div className="space-y-1.5 min-w-0">
-                      <div className="flex items-center justify-between text-xs">
-                        <h4 className="font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px] sm:text-xs">
-                          Requisition Line Items ({pr.items.length})
+                    {/* Requisition Line Items (Adaptive Mobile Cards + Desktop Table) */}
+                    <div className="pr-line-items-container space-y-2 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[10px] sm:text-xs flex items-center gap-1.5">
+                          <span>Requisition Line Items</span>
+                          <span className="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">
+                            {pr.items.length}
+                          </span>
                         </h4>
-                        <span className="text-[10px] text-slate-400 sm:hidden">
-                          Swipe table ➔
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500 sm:hidden">
+                          Compact Breakdown
                         </span>
                       </div>
 
-                      <div className="pr-table-wrapper max-w-full border border-slate-200 dark:border-slate-800 rounded-lg overflow-x-auto no-scrollbar">
-                        <table className="w-full text-left text-xs min-w-[460px] sm:min-w-[500px]">
-                          <thead className="bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 uppercase text-[9px] sm:text-[10px] tracking-wider border-b border-slate-200 dark:border-slate-800">
+                      {/* 1. Mobile Cards Layout (< 640px) - Zero Horizontal Overflow, Adjusted Snug Padding */}
+                      <div className="sm:hidden space-y-2">
+                        {pr.items.map((item, idx) => (
+                          <div
+                            key={item.id || idx}
+                            className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 space-y-1.5"
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0 flex-1">
+                                <div className="font-semibold text-xs text-slate-900 dark:text-white break-words leading-tight">
+                                  {item.name}
+                                </div>
+                                {item.specifications && (
+                                  <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-0.5 break-words">
+                                    {item.specifications}
+                                  </div>
+                                )}
+                              </div>
+                              <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 shrink-0">
+                                {item.category}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center justify-between pt-1.5 border-t border-slate-200/80 dark:border-slate-800/80 text-xs">
+                              <div className="text-slate-500 dark:text-slate-400 text-[11px]">
+                                <span className="font-semibold text-slate-700 dark:text-slate-300">{item.quantity} {item.unit}</span>
+                                <span className="mx-1">×</span>
+                                <span>{formatCurrency(item.estimatedUnitPrice)}</span>
+                              </div>
+                              <div className="font-bold text-slate-900 dark:text-white text-xs">
+                                {formatCurrency(item.totalPrice)}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+
+                        {/* Mobile Cost Totals Summary Card */}
+                        <div className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-100/70 dark:bg-slate-950/80 space-y-1.5 text-xs">
+                          <div className="flex justify-between items-center text-slate-500 dark:text-slate-400 text-[11px]">
+                            <span>Subtotal:</span>
+                            <span className="font-medium text-slate-800 dark:text-slate-200">{formatCurrency(pr.subtotal)}</span>
+                          </div>
+                          <div className="flex justify-between items-center text-slate-500 dark:text-slate-400 text-[11px]">
+                            <span>Estimated Tax (8%):</span>
+                            <span className="font-medium text-slate-800 dark:text-slate-200">{formatCurrency(pr.estimatedTax)}</span>
+                          </div>
+                          <div className="flex justify-between items-center pt-1.5 border-t border-slate-200 dark:border-slate-800 font-bold text-blue-600 dark:text-blue-400 text-xs">
+                            <span>Grand Total:</span>
+                            <span>{formatCurrency(pr.totalAmount)}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 2. Tablet & Desktop Structured Table (>= 640px) */}
+                      <div className="hidden sm:block pr-table-wrapper max-w-full border border-slate-200 dark:border-slate-800 rounded-lg overflow-x-auto no-scrollbar">
+                        <table className="w-full text-left text-xs min-w-[500px]">
+                          <thead className="bg-slate-50 dark:bg-slate-950 text-slate-500 dark:text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-200 dark:border-slate-800">
                             <tr>
-                              <th className="py-2 px-2.5 sm:py-2.5 sm:px-3">Item Description</th>
-                              <th className="py-2 px-2.5 sm:py-2.5 sm:px-3">Category</th>
-                              <th className="py-2 px-2.5 sm:py-2.5 sm:px-3">Qty</th>
-                              <th className="py-2 px-2.5 sm:py-2.5 sm:px-3">Est. Unit Price</th>
-                              <th className="py-2 px-2.5 sm:py-2.5 sm:px-3 text-right">Total</th>
+                              <th className="py-2.5 px-3">Item Description</th>
+                              <th className="py-2.5 px-3">Category</th>
+                              <th className="py-2.5 px-3">Qty</th>
+                              <th className="py-2.5 px-3">Est. Unit Price</th>
+                              <th className="py-2.5 px-3 text-right">Total</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-slate-800 dark:text-slate-200">
                             {pr.items.map((item) => (
                               <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30">
-                                <td className="py-2 px-2.5 sm:py-2.5 sm:px-3">
+                                <td className="py-2.5 px-3">
                                   <div className="font-medium text-slate-900 dark:text-white break-words">{item.name}</div>
                                   {item.specifications && (
-                                    <div className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5 break-words">
+                                    <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5 break-words">
                                       {item.specifications}
                                     </div>
                                   )}
                                 </td>
-                                <td className="py-2 px-2.5 sm:py-2.5 sm:px-3 text-slate-500 dark:text-slate-400">{item.category}</td>
-                                <td className="py-2 px-2.5 sm:py-2.5 sm:px-3 font-semibold whitespace-nowrap">
+                                <td className="py-2.5 px-3 text-slate-500 dark:text-slate-400">{item.category}</td>
+                                <td className="py-2.5 px-3 font-semibold whitespace-nowrap">
                                   {item.quantity} {item.unit}
                                 </td>
-                                <td className="py-2 px-2.5 sm:py-2.5 sm:px-3 whitespace-nowrap">{formatCurrency(item.estimatedUnitPrice)}</td>
-                                <td className="py-2 px-2.5 sm:py-2.5 sm:px-3 text-right font-bold text-slate-900 dark:text-white whitespace-nowrap">
+                                <td className="py-2.5 px-3 whitespace-nowrap">{formatCurrency(item.estimatedUnitPrice)}</td>
+                                <td className="py-2.5 px-3 text-right font-bold text-slate-900 dark:text-white whitespace-nowrap">
                                   {formatCurrency(item.totalPrice)}
                                 </td>
                               </tr>
@@ -208,26 +265,26 @@ export const PurchaseRequestsView: React.FC<PurchaseRequestsViewProps> = ({ onOp
                           </tbody>
                           <tfoot className="bg-slate-50 dark:bg-slate-950/80 border-t border-slate-200 dark:border-slate-800 font-medium text-xs">
                             <tr>
-                              <td colSpan={4} className="py-1.5 px-2.5 sm:py-2 sm:px-3 text-right text-slate-500 dark:text-slate-400">
+                              <td colSpan={4} className="py-2 px-3 text-right text-slate-500 dark:text-slate-400">
                                 Subtotal:
                               </td>
-                              <td className="py-1.5 px-2.5 sm:py-2 sm:px-3 text-right text-slate-900 dark:text-white whitespace-nowrap">
+                              <td className="py-2 px-3 text-right text-slate-900 dark:text-white whitespace-nowrap">
                                 {formatCurrency(pr.subtotal)}
                               </td>
                             </tr>
                             <tr>
-                              <td colSpan={4} className="py-1.5 px-2.5 sm:py-2 sm:px-3 text-right text-slate-500 dark:text-slate-400">
+                              <td colSpan={4} className="py-2 px-3 text-right text-slate-500 dark:text-slate-400">
                                 Estimated Tax (8%):
                               </td>
-                              <td className="py-1.5 px-2.5 sm:py-2 sm:px-3 text-right text-slate-900 dark:text-white whitespace-nowrap">
+                              <td className="py-2 px-3 text-right text-slate-900 dark:text-white whitespace-nowrap">
                                 {formatCurrency(pr.estimatedTax)}
                               </td>
                             </tr>
-                            <tr className="font-bold text-xs sm:text-sm text-blue-600 dark:text-blue-400">
-                              <td colSpan={4} className="py-2 px-2.5 sm:px-3 text-right">
+                            <tr className="font-bold text-sm text-blue-600 dark:text-blue-400">
+                              <td colSpan={4} className="py-2.5 px-3 text-right">
                                 Grand Total Requisition:
                               </td>
-                              <td className="py-2 px-2.5 sm:py-2 sm:px-3 text-right whitespace-nowrap">
+                              <td className="py-2.5 px-3 text-right whitespace-nowrap">
                                 {formatCurrency(pr.totalAmount)}
                               </td>
                             </tr>

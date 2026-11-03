@@ -219,6 +219,9 @@
 @media screen and (max-width: 640px) {
   .pr-card {
     border-radius: 0.75rem;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
   .pr-filter-tabs {
@@ -235,10 +238,19 @@
     font-size: 0.75rem;
   }
 
+  /* Requisition Line Items Mobile Overrides */
+  .pr-line-items-container {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
   .pr-table-wrapper {
     -webkit-overflow-scrolling: touch;
     touch-action: pan-x pan-y;
     border-radius: 0.5rem;
+    width: 100%;
+    max-width: 100%;
   }
 
   .pr-table-wrapper table {
@@ -269,7 +281,7 @@
 /* 2. Extra Small Screens (<= 380px) */
 @media screen and (max-width: 380px) {
   .pr-card-header {
-    padding: 0.75rem !important;
+    padding: 0.625rem !important;
   }
 
   .pr-filter-tabs button {
@@ -285,6 +297,11 @@
 
 /* 3. Tablets (641px - 1024px) */
 @media screen and (min-width: 641px) and (max-width: 1024px) {
+  .pr-card {
+    width: 100%;
+    max-width: 100%;
+  }
+
   .pr-action-footer {
     display: flex;
     flex-direction: row;
