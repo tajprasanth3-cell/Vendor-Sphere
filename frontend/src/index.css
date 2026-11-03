@@ -313,3 +313,122 @@
     min-width: 500px;
   }
 }
+
+/* ==========================================================
+   PURCHASE ORDERS (PO) RESPONSIVE MEDIA QUERIES & OVERFLOW CONTROL
+   ========================================================== */
+
+/* Universal Container Overflow Guard */
+.purchase-orders-view {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  word-wrap: break-word;
+}
+
+/* 1. Mobile Phones (<= 640px) */
+@media screen and (max-width: 640px) {
+  .purchase-orders-view {
+    padding-left: 0.125rem;
+    padding-right: 0.125rem;
+  }
+
+  .po-metrics-grid {
+    gap: 0.5rem;
+  }
+
+  .po-metrics-grid > div {
+    padding: 0.625rem 0.75rem !important;
+    border-radius: 0.75rem;
+  }
+
+  .po-filter-tabs {
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.375rem;
+  }
+
+  .po-filter-tabs button {
+    padding: 0.375rem 0.625rem;
+    font-size: 0.75rem;
+  }
+
+  .po-card {
+    border-radius: 0.75rem;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    padding: 0.875rem !important;
+  }
+
+  .po-card-actions button {
+    min-height: 38px;
+    font-size: 0.75rem;
+  }
+
+  .po-voucher-modal {
+    padding: 0.125rem;
+  }
+}
+
+/* 2. Extra Small Screens (<= 380px) */
+@media screen and (max-width: 380px) {
+  .po-metrics-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.375rem;
+  }
+
+  .po-metrics-grid > div {
+    padding: 0.5rem !important;
+  }
+
+  .po-card {
+    padding: 0.75rem !important;
+  }
+
+  .po-card-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .po-filter-tabs button {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.5rem;
+  }
+}
+
+/* 3. Tablets (641px - 1024px) */
+@media screen and (min-width: 641px) and (max-width: 1024px) {
+  .purchase-orders-view {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .po-table-wrapper {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .po-table-wrapper table {
+    min-width: 700px;
+  }
+}
+
+/* 4. PO Document Print Styles */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .po-voucher-modal,
+  .po-voucher-modal * {
+    visibility: visible;
+  }
+  .po-voucher-modal {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: white !important;
+    color: black !important;
+  }
+  .po-voucher-modal button {
+    display: none !important;
+  }
+}
