@@ -102,11 +102,11 @@ export const CreatePRModal: React.FC<CreatePRModalProps> = ({ isOpen, onClose })
       subtitle="Submit an authorized procurement requisition for department and finance review."
       maxWidth="4xl"
     >
-      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 text-slate-800 dark:text-slate-200">
+      <form onSubmit={handleSubmit} className="space-y-3.5 sm:space-y-5 text-slate-800 dark:text-slate-200">
         {/* Top Info Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
-          <div className="md:col-span-2 space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 sm:gap-4">
+          <div className="md:col-span-2 space-y-1">
+            <label className="text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300">
               Requisition Title *
             </label>
             <input
@@ -115,16 +115,16 @@ export const CreatePRModal: React.FC<CreatePRModalProps> = ({ isOpen, onClose })
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Q4 Data Center Network Switch Upgrades"
-              className="w-full bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-700/80 rounded-lg px-3 sm:px-3.5 py-2 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-700/80 rounded-lg px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Department</label>
+          <div className="space-y-1">
+            <label className="text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300">Department</label>
             <select
               value={department}
               onChange={(e) => setDepartment(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-700/80 rounded-lg px-3 py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
+              className="w-full bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-700/80 rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
             >
               <option value="Infrastructure & DevOps">Infrastructure & DevOps</option>
               <option value="Facilities & Workplace">Facilities & Workplace</option>
@@ -135,13 +135,13 @@ export const CreatePRModal: React.FC<CreatePRModalProps> = ({ isOpen, onClose })
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Priority Level</label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-4">
+          <div className="space-y-1">
+            <label className="text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300">Priority Level</label>
             <select
               value={priority}
               onChange={(e) => setPriority(e.target.value as Priority)}
-              className="w-full bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-700/80 rounded-lg px-3 py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
+              className="w-full bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-700/80 rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
             >
               <option value="low">Low (Standard fulfillment)</option>
               <option value="medium">Medium (Routine operations)</option>
@@ -150,8 +150,8 @@ export const CreatePRModal: React.FC<CreatePRModalProps> = ({ isOpen, onClose })
             </select>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+          <div className="space-y-1">
+            <label className="text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300">
               Required Delivery Date
             </label>
             <input
@@ -159,15 +159,15 @@ export const CreatePRModal: React.FC<CreatePRModalProps> = ({ isOpen, onClose })
               required
               value={requiredDate}
               onChange={(e) => setRequiredDate(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-700/80 rounded-lg px-3.5 py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-700/80 rounded-lg px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
 
-          <div className="space-y-1.5 sm:col-span-2 md:col-span-1">
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+          <div className="space-y-1 sm:col-span-2 md:col-span-1">
+            <label className="text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300">
               Approval Level Estimated
             </label>
-            <div className="h-[38px] px-3 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-lg flex items-center text-xs text-blue-700 dark:text-blue-400 font-medium">
+            <div className="h-[36px] sm:h-[38px] px-3 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-lg flex items-center text-xs text-blue-700 dark:text-blue-400 font-medium">
               {totalAmount > 50000
                 ? 'Finance Director / CFO'
                 : totalAmount > 5000
@@ -178,8 +178,8 @@ export const CreatePRModal: React.FC<CreatePRModalProps> = ({ isOpen, onClose })
         </div>
 
         {/* Business Justification */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+        <div className="space-y-1">
+          <label className="text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300">
             Business Need & Justification *
           </label>
           <textarea
@@ -188,12 +188,12 @@ export const CreatePRModal: React.FC<CreatePRModalProps> = ({ isOpen, onClose })
             value={businessJustification}
             onChange={(e) => setBusinessJustification(e.target.value)}
             placeholder="Explain why this purchase is necessary, expected ROI, and timeline constraints..."
-            className="w-full bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-700/80 rounded-lg px-3 sm:px-3.5 py-2 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-700/80 rounded-lg px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
 
         {/* Requisition Line Items */}
-        <div className="space-y-3">
+        <div className="space-y-2.5 sm:space-y-3">
           <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
             <h4 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
               <Calculator className="w-4 h-4 text-blue-600 dark:text-blue-400" />
@@ -210,14 +210,14 @@ export const CreatePRModal: React.FC<CreatePRModalProps> = ({ isOpen, onClose })
             </Button>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2.5 sm:space-y-3">
             {items.map((item, idx) => (
               <div
                 key={item.id}
-                className="bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl p-3 sm:p-3.5 space-y-2.5 sm:space-y-3"
+                className="bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 sm:p-3.5 space-y-2 sm:space-y-2.5"
               >
                 <div className="grid grid-cols-12 gap-2 sm:gap-3 items-center">
-                  <div className="col-span-12 sm:col-span-5 space-y-1">
+                  <div className="col-span-10 sm:col-span-5 space-y-1">
                     <span className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium">Item Description #{idx + 1}</span>
                     <input
                       type="text"
@@ -227,6 +227,18 @@ export const CreatePRModal: React.FC<CreatePRModalProps> = ({ isOpen, onClose })
                       onChange={(e) => handleItemChange(item.id, 'name', e.target.value)}
                       className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400"
                     />
+                  </div>
+
+                  <div className="col-span-2 sm:hidden flex justify-end pt-3">
+                    <button
+                      type="button"
+                      disabled={items.length <= 1}
+                      onClick={() => handleRemoveItem(item.id)}
+                      className="text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 disabled:opacity-30 p-1 cursor-pointer"
+                      title="Remove item"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
 
                   <div className="col-span-4 sm:col-span-2 space-y-1">
@@ -251,19 +263,20 @@ export const CreatePRModal: React.FC<CreatePRModalProps> = ({ isOpen, onClose })
                     />
                   </div>
 
-                  <div className="col-span-3 sm:col-span-2 space-y-1">
+                  <div className="col-span-4 sm:col-span-2 space-y-1">
                     <span className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium">Total</span>
                     <div className="py-1.5 text-xs font-bold text-slate-900 dark:text-slate-200">
                       {formatCurrency(item.totalPrice)}
                     </div>
                   </div>
 
-                  <div className="col-span-1 flex justify-end pt-3 sm:pt-5">
+                  <div className="hidden sm:flex col-span-1 justify-end pt-4">
                     <button
                       type="button"
                       disabled={items.length <= 1}
                       onClick={() => handleRemoveItem(item.id)}
                       className="text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 disabled:opacity-30 disabled:hover:text-slate-400 p-1 cursor-pointer"
+                      title="Remove item"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -285,15 +298,15 @@ export const CreatePRModal: React.FC<CreatePRModalProps> = ({ isOpen, onClose })
         </div>
 
         {/* Cost Summary Box */}
-        <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+        <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-4">
           <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
             <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
             <span>Includes 8% estimated standard sales & logistics tax provision.</span>
           </div>
-          <div className="text-left sm:text-right space-y-0.5 w-full sm:w-auto">
-            <div className="text-xs text-slate-500 dark:text-slate-400">Subtotal: {formatCurrency(subtotal)}</div>
-            <div className="text-xs text-slate-500 dark:text-slate-400">Tax (8%): {formatCurrency(estimatedTax)}</div>
-            <div className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+          <div className="text-left sm:text-right space-y-0.5 w-full sm:w-auto pt-1 sm:pt-0 border-t sm:border-t-0 border-slate-200 dark:border-slate-800">
+            <div className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Subtotal: {formatCurrency(subtotal)}</div>
+            <div className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Tax (8%): {formatCurrency(estimatedTax)}</div>
+            <div className="text-xs sm:text-base font-bold text-slate-900 dark:text-white">
               Total Budget: <span className="text-blue-600 dark:text-blue-400">{formatCurrency(totalAmount)}</span>
             </div>
           </div>
