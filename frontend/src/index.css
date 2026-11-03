@@ -17,6 +17,12 @@
 
   * {
     border-color: var(--color-border);
+    box-sizing: border-box;
+  }
+
+  html, body {
+    max-width: 100%;
+    overflow-x: hidden;
   }
 }
 
@@ -39,15 +45,160 @@
   background: rgba(148, 163, 184, 0.45);
 }
 
-/* Responsive Touch & Mobile Utilities */
-@media (max-width: 640px) {
+/* Hide scrollbar utility for touch sliders */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ==========================================================
+   PROCUREMENT OVERVIEW RESPONSIVE MEDIA QUERIES & OVERFLOW CONTROL
+   ========================================================== */
+
+/* 1. Universal Container Overflow Guard */
+.procurement-overview {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  word-wrap: break-word;
+}
+
+/* 2. Mobile Phones (<= 640px) */
+@media screen and (max-width: 640px) {
   html {
     font-size: 14px;
   }
+
+  .procurement-overview {
+    padding-left: 0.125rem;
+    padding-right: 0.125rem;
+  }
+
+  .overview-hero-banner {
+    padding: 0.875rem 1rem !important;
+    border-radius: 0.875rem;
+  }
+
+  .overview-hero-actions {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .overview-hero-actions button {
+    width: 100%;
+    justify-content: center;
+    padding: 0.625rem 1rem;
+    min-height: 40px;
+  }
+
+  /* Horizontal swipe pipeline on mobile screens */
+  .overview-pipeline-container {
+    display: flex !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+    margin-left: -0.25rem;
+    margin-right: -0.25rem;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+  }
+
+  .overview-pipeline-step {
+    flex: 0 0 140px !important;
+    min-width: 140px !important;
+    scroll-snap-align: start;
+    box-sizing: border-box;
+  }
+
+  /* Action items card adjustments */
+  .overview-requisition-item {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+    padding: 0.75rem 0.875rem !important;
+  }
+
+  .overview-requisition-actions {
+    width: 100% !important;
+    border-top: 1px solid rgba(226, 232, 240, 0.8) !important;
+    padding-top: 0.625rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+
+  .dark .overview-requisition-actions {
+    border-top-color: rgba(30, 41, 59, 0.8) !important;
+  }
 }
 
-@media (min-width: 641px) and (max-width: 1024px) {
+/* 3. Extra Small Screens (<= 380px) */
+@media screen and (max-width: 380px) {
+  .overview-pipeline-step {
+    flex: 0 0 130px !important;
+    min-width: 130px !important;
+    padding: 0.5rem !important;
+  }
+
+  .overview-requisition-actions {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.5rem !important;
+  }
+
+  .overview-requisition-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* 4. Tablets & Medium Screens (641px - 1024px) */
+@media screen and (min-width: 641px) and (max-width: 1024px) {
   html {
     font-size: 15px;
+  }
+
+  .procurement-overview {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .overview-pipeline-container {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 0.5rem;
+  }
+
+  .overview-pipeline-step {
+    min-width: 0 !important;
+    flex: initial !important;
+  }
+
+  .overview-hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+}
+
+/* 5. Desktops & Laptops (>= 1025px) */
+@media screen and (min-width: 1025px) {
+  .overview-pipeline-container {
+    display: grid !important;
+    grid-template-columns: repeat(8, minmax(0, 1fr)) !important;
+    gap: 0.5rem;
+  }
+
+  .overview-pipeline-step {
+    min-width: 0 !important;
+    flex: initial !important;
   }
 }
