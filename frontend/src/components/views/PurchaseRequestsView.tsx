@@ -13,7 +13,8 @@ import {
   Send, 
   Layers, 
   ShieldCheck, 
-  AlertCircle
+  AlertCircle,
+  DollarSign
 } from 'lucide-react';
 
 interface PurchaseRequestsViewProps {
@@ -34,6 +35,15 @@ export const PurchaseRequestsView: React.FC<PurchaseRequestsViewProps> = ({ onOp
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [expandedPRId, setExpandedPRId] = useState<string | null>('pr-1');
 
+  const totalCount = purchaseRequests.length;
+  const pendingCount = purchaseRequests.filter(
+    (pr) => pr.status === 'pending_dept_approval' || pr.status === 'pending_procurement_review'
+  ).length;
+  const approvedBudget = purchaseRequests
+    .filter((pr) => pr.status === 'approved' || pr.status === 'rfq_initiated')
+    .reduce((sum, pr) => sum + pr.totalAmount, 0);
+  const rfqReadyCount = purchaseRequests.filter((pr) => pr.status === 'approved').length;
+
   const filtered = purchaseRequests.filter((pr) => {
     const matchesFilter =
       statusFilter === 'all' ||
@@ -52,15 +62,15 @@ export const PurchaseRequestsView: React.FC<PurchaseRequestsViewProps> = ({ onOp
   });
 
   return (
-    <div className="purchase-requests-view w-full max-w-full overflow-x-hidden space-y-3.5 sm:space-y-5">
+    <div className="purchase-requests-view w-full max-w-full overflow-x-hidden space-y-4 sm:space-y-6">
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
         <div className="min-w-0">
-          <h2 className="text-base sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+          <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
             <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0" />
-            <span>Purchase Requisitions (PR)</span>
+            <span className="truncate">Purchase Requisitions (PR)</span>
           </h2>
-          <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 max-w-2xl">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed break-words">
             Manage organizational purchasing demands, line item specs, and multi-tier authorization workflows.
           </p>
         </div>
@@ -68,14 +78,57 @@ export const PurchaseRequestsView: React.FC<PurchaseRequestsViewProps> = ({ onOp
           variant="primary"
           size="md"
           onClick={onOpenCreateModal}
-          className="w-full sm:w-auto shrink-0 justify-center min-h-[38px]"
+          className="w-full sm:w-auto shrink-0 justify-center min-h-[38px] text-xs font-semibold"
         >
           + New Requisition
         </Button>
       </div>
 
+      {/* PR Executive Metrics Grid */}
+      <div className="pr-metrics-grid grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
+        <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs">
+          <div className="text-[10px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5 truncate">
+            <FileText className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
+            <span>Total Requests</span>
+          </div>
+          <div className="mt-1 text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+            {totalCount}
+          </div>
+        </div>
+
+        <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs">
+          <div className="text-[10px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5 truncate">
+            <Clock className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+            <span>Pending Review</span>
+          </div>
+          <div className="mt-1 text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+            {pendingCount}
+          </div>
+        </div>
+
+        <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs">
+          <div className="text-[10px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5 truncate">
+            <DollarSign className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <span>Authorized Budget</span>
+          </div>
+          <div className="mt-1 text-base sm:text-lg font-bold text-slate-900 dark:text-white truncate">
+            {formatCurrency(approvedBudget)}
+          </div>
+        </div>
+
+        <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs">
+          <div className="text-[10px] sm:text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5 truncate">
+            <Layers className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400 shrink-0" />
+            <span>Ready for RFQ</span>
+          </div>
+          <div className="mt-1 text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+            {rfqReadyCount}
+          </div>
+        </div>
+      </div>
+
       {/* Filter Tabs */}
-      <div className="pr-filter-tabs flex items-center gap-1.5 sm:gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 sm:pb-2.5 overflow-x-auto no-scrollbar">
+      <div className="pr-filter-tabs flex items-center gap-1.5 sm:gap-2 pb-1 overflow-x-auto no-scrollbar">
         {[
           { id: 'all', label: `All Requests (${purchaseRequests.length})` },
           { id: 'pending', label: 'Pending Approvals' },
@@ -114,7 +167,7 @@ export const PurchaseRequestsView: React.FC<PurchaseRequestsViewProps> = ({ onOp
               >
                 {/* Collapsed Header Summary */}
                 <div
-                  className="pr-card-header p-3 sm:p-4 md:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-2.5 sm:gap-4 cursor-pointer select-none bg-slate-50/50 dark:bg-slate-900/60"
+                  className="pr-card-header p-3.5 sm:p-4 md:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-2.5 sm:gap-4 cursor-pointer select-none bg-slate-50/50 dark:bg-slate-900/60"
                   onClick={() => setExpandedPRId(isExpanded ? null : pr.id)}
                 >
                   <div className="space-y-1 sm:space-y-1.5 min-w-0 flex-1">
@@ -315,16 +368,16 @@ export const PurchaseRequestsView: React.FC<PurchaseRequestsViewProps> = ({ onOp
                               }`}
                             >
                               <div className="flex items-center justify-between mb-1 gap-1">
-                                <span className="font-bold text-slate-900 dark:text-white truncate">{step.stepName}</span>
+                                <span className="font-bold text-slate-900 dark:text-white break-words text-xs">{step.stepName}</span>
                                 {isApproved ? (
                                   <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                                 ) : (
                                   <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600 dark:text-amber-400 shrink-0" />
                                 )}
                               </div>
-                              <div className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 truncate">{step.approverRole}</div>
+                              <div className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 break-words">{step.approverRole}</div>
                               {step.approverName && (
-                                <div className="text-[10px] sm:text-[11px] text-slate-800 dark:text-slate-300 font-medium mt-0.5 truncate">
+                                <div className="text-[10px] sm:text-[11px] text-slate-800 dark:text-slate-300 font-medium mt-0.5 break-words">
                                   {step.approverName}
                                 </div>
                               )}
