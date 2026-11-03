@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { 
   UserRole, 
-  AuthUser,
   PurchaseRequest, 
   RFQ, 
   PurchaseOrder, 
@@ -21,6 +20,25 @@ import {
 
 export type ThemeMode = 'light' | 'dark';
 
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  department: string;
+  avatar?: string;
+}
+
+export interface SystemNotification {
+  id: string;
+  title: string;
+  message: string;
+  type: 'info' | 'success' | 'warning' | 'alert';
+  timestamp: string;
+  read: boolean;
+  targetView?: string;
+}
+
 export const DEMO_ACCOUNTS: Record<UserRole, AuthUser> = {
   procurement_manager: {
     id: 'usr-1',
@@ -34,7 +52,7 @@ export const DEMO_ACCOUNTS: Record<UserRole, AuthUser> = {
     name: 'Sarah Jenkins',
     email: 's.jenkins@enterprise.internal',
     role: 'requester',
-    department: 'Infrastructure & DevOps',
+    department: 'Infrastructure & R&D Engineering',
   },
   admin: {
     id: 'usr-3',
@@ -51,6 +69,45 @@ export const DEMO_ACCOUNTS: Record<UserRole, AuthUser> = {
     department: 'Apex Cloud Solutions Inc.',
   },
 };
+
+const INITIAL_NOTIFICATIONS: SystemNotification[] = [
+  {
+    id: 'notif-1',
+    title: 'Pending Executive Capex Authorization',
+    message: 'Requisition PR-2026-0098 ($74,655.00) for Facilities is awaiting Finance Director approval.',
+    type: 'warning',
+    timestamp: '10m ago',
+    read: false,
+    targetView: 'requests',
+  },
+  {
+    id: 'notif-2',
+    title: 'Supplier Bid Submitted',
+    message: 'Apex Cloud Solutions submitted a quotation ($82,500.00) for Cloud SIEM Renewal.',
+    type: 'info',
+    timestamp: '45m ago',
+    read: false,
+    targetView: 'quotations',
+  },
+  {
+    id: 'notif-3',
+    title: 'Purchase Order Dispatched',
+    message: 'Official PO-2026-7841 dispatched to Nova Hardware Logistics Ltd for fulfillment.',
+    type: 'success',
+    timestamp: '2h ago',
+    read: true,
+    targetView: 'orders',
+  },
+  {
+    id: 'notif-4',
+    title: 'Receiving Dock Inspection Needed',
+    message: 'Waybill FX-88912048991 arrived at Bay 4. Complete 3-Way Match receiving inspection.',
+    type: 'alert',
+    timestamp: '4h ago',
+    read: false,
+    targetView: 'deliveries',
+  },
+];
 
 interface ProcurementContextType {
   role: UserRole;
@@ -69,6 +126,14 @@ interface ProcurementContextType {
   deliveries: DeliveryShipment[];
   vendors: Vendor[];
   auditLogs: AuditLog[];
+  notifications: SystemNotification[];
+  unreadNotificationsCount: number;
+  markNotificationAsRead: (id: string) => void;
+  markAllNotificationsAsRead: () => void;
+  clearNotifications: () => void;
+  addNotification: (title: string, message: string, type?: 'info' | 'success' | 'warning' | 'alert', targetView?: string) => void;
+  forgotPassword: (email: string) => Promise<{ success: boolean; message: string; otp?: string }>;
+  resetPasswordWithOtp: (email: string, otp: string, newPassword: string) => Promise<{ success: boolean; message: string }>;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   activeView: string;
@@ -176,6 +241,86 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [vendors, setVendors] = useState<Vendor[]>(INITIAL_VENDORS);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(INITIAL_AUDIT_LOGS);
 
+  // Notifications State with persistence
+  const [notifications, setNotifications] = useState<SystemNotification[]>(() => {
+    const saved = localStorage.getItem('vendorsphere_notifications');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return INITIAL_NOTIFICATIONS;
+      }
+    }
+    return INITIAL_NOTIFICATIONS;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('vendorsphere_notifications', JSON.stringify(notifications));
+  }, [notifications]);
+
+  const unreadNotificationsCount = notifications.filter((n) => !n.read).length;
+
+  const addNotification = (
+    title: string, 
+    message: string, 
+    type: 'info' | 'success' | 'warning' | 'alert' = 'info', 
+    targetView?: string
+  ) => {
+    const newNotif: SystemNotification = {
+      id: `notif-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      title,
+      message,
+      type,
+      timestamp: 'Just now',
+      read: false,
+      targetView,
+    };
+    setNotifications((prev) => [newNotif, ...prev]);
+  };
+
+  const markNotificationAsRead = (id: string) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+    );
+  };
+
+  const markAllNotificationsAsRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  };
+
+  const clearNotifications = () => {
+    setNotifications([]);
+  };
+
+  const forgotPassword = async (emailToReset: string): Promise<{ success: boolean; message: string; otp?: string }> => {
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          success: true,
+          message: `Verification code sent to corporate email: ${emailToReset}`,
+          otp,
+        });
+      }, 400);
+    });
+  };
+
+  const resetPasswordWithOtp = async (
+    _email: string, 
+    otp: string, 
+    _newPassword: string
+  ): Promise<{ success: boolean; message: string }> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        if (!otp || otp.trim().length !== 6) {
+          resolve({ success: false, message: 'Invalid 6-digit verification code.' });
+        } else {
+          resolve({ success: true, message: 'Password updated successfully. You can now sign in with your new credentials.' });
+        }
+      }, 400);
+    });
+  };
+
   const addAuditLog = (
     action: string, 
     entityType: AuditLog['entityType'], 
@@ -214,8 +359,8 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
       title: data.title,
       department: data.department,
       requestedBy: {
-        name: currentUser?.name || 'Sarah Jenkins',
-        email: currentUser?.email || 's.jenkins@enterprise.internal',
+        name: currentUser?.name || 'Authorized Requester',
+        email: currentUser?.email || 'user@enterprise.internal',
       },
       priority: data.priority,
       status: 'pending_dept_approval',
@@ -248,12 +393,15 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     setPurchaseRequests((prev) => [newPR, ...prev]);
     addAuditLog('PR_CREATED', 'PR', prCode, `New Requisition filed for ${data.department}: $${totalAmount.toLocaleString()}`);
+    addNotification('New Requisition Submitted', `Requisition ${prCode} filed for ${data.department} ($${totalAmount.toLocaleString()}).`, 'info', 'requests');
   };
 
   const approvePurchaseRequest = (prId: string, comments = 'Approved in accordance with procurement policy.') => {
+    let prCode = '';
     setPurchaseRequests((prev) =>
       prev.map((pr) => {
         if (pr.id !== prId) return pr;
+        prCode = pr.code;
 
         const updatedChain = [...pr.approvalChain];
         const nextPendingIndex = updatedChain.findIndex((step) => step.status === 'pending');
@@ -262,66 +410,105 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
           updatedChain[nextPendingIndex] = {
             ...updatedChain[nextPendingIndex],
             status: 'approved',
+            approverName: currentUser?.name || 'Elena Rostova',
             updatedAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
             comments,
           };
         }
 
-        const allApproved = updatedChain.every((s) => s.status === 'approved');
-        const nextStatus = allApproved ? 'approved' : 'pending_procurement_review';
+        const allApproved = updatedChain.every((step) => step.status === 'approved');
+        const newStatus = allApproved
+          ? 'approved'
+          : nextPendingIndex === 0
+          ? 'pending_procurement_review'
+          : 'pending_finance_approval';
 
-        addAuditLog(
-          'PR_STEP_APPROVED',
-          'PR',
-          pr.code,
-          `Step "${updatedChain[nextPendingIndex]?.stepName}" approved. Next state: ${nextStatus}`
+        return {
+          ...pr,
+          approvalChain: updatedChain,
+          status: newStatus,
+        };
+      })
+    );
+
+    addAuditLog('PR_APPROVED', 'PR', prCode || prId, `Approval milestone signed by ${currentUser?.name || 'Elena Rostova'}`);
+    addNotification('Requisition Approved', `Requisition ${prCode || prId} authorized to next workflow tier.`, 'success', 'requests');
+  };
+
+  const rejectPurchaseRequest = (prId: string, comments = 'Rejected by procurement reviewer.') => {
+    let prCode = '';
+    setPurchaseRequests((prev) =>
+      prev.map((pr) => {
+        if (pr.id !== prId) return pr;
+        prCode = pr.code;
+
+        const updatedChain = pr.approvalChain.map((step) =>
+          step.status === 'pending'
+            ? {
+                ...step,
+                status: 'rejected' as const,
+                approverName: currentUser?.name || 'Elena Rostova',
+                updatedAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
+                comments,
+              }
+            : step
         );
 
         return {
           ...pr,
-          status: nextStatus,
           approvalChain: updatedChain,
-        };
-      })
-    );
-  };
-
-  const rejectPurchaseRequest = (prId: string, comments = 'Rejected by review committee.') => {
-    setPurchaseRequests((prev) =>
-      prev.map((pr) => {
-        if (pr.id !== prId) return pr;
-        addAuditLog('PR_REJECTED', 'PR', pr.code, `Requisition rejected. Reason: ${comments}`);
-        return {
-          ...pr,
           status: 'rejected',
         };
       })
     );
+
+    addAuditLog('PR_REJECTED', 'PR', prCode || prId, `Requisition rejected. Reason: ${comments}`);
+    addNotification('Requisition Rejected', `Requisition ${prCode || prId} declined: ${comments}`, 'alert', 'requests');
   };
 
   const initiateRFQ = (prId: string, deadline: string) => {
-    const pr = purchaseRequests.find((p) => p.id === prId);
-    if (!pr) return;
+    const targetPR = purchaseRequests.find((pr) => pr.id === prId);
+    if (!targetPR) return;
 
-    const rfqCode = `RFQ-2026-0${Math.floor(10 + Math.random() * 89)}`;
-    const newRfq: RFQ = {
+    const rfqCode = `RFQ-2026-00${Math.floor(50 + Math.random() * 49)}`;
+    const newRFQ: RFQ = {
       id: `rfq-${Date.now()}`,
       code: rfqCode,
-      prId: pr.id,
-      prCode: pr.code,
-      title: `Competitive Sourcing: ${pr.title}`,
-      targetBudget: pr.totalAmount,
+      prId: targetPR.id,
+      prCode: targetPR.code,
+      title: targetPR.title,
+      status: 'open',
+      targetBudget: targetPR.totalAmount,
       deadline,
       invitedVendorsCount: 3,
-      status: 'open',
-      bids: [],
+      bids: [
+        {
+          id: `bid-new-1`,
+          vendorId: 'ven-1',
+          vendorName: 'Apex Cloud Solutions Inc.',
+          vendorRating: 4.9,
+          submittedAt: 'Just Now',
+          quotedAmount: Math.round(targetPR.totalAmount * 0.94),
+          deliveryDays: 5,
+          warrantyPeriodMonths: 24,
+          paymentTerms: 'Net 30 Days',
+          complianceScore: 98,
+          scoreBreakdown: { pricing: 94, deliverySpeed: 96, reputation: 99 },
+          notes: 'Standard enterprise discount applied. Expedited delivery included.',
+          isRecommended: true,
+          status: 'submitted',
+        },
+      ],
     };
 
-    setRfqs((prev) => [newRfq, ...prev]);
+    setRfqs((prev) => [newRFQ, ...prev]);
+
     setPurchaseRequests((prev) =>
-      prev.map((p) => (p.id === prId ? { ...p, status: 'rfq_initiated' } : p))
+      prev.map((pr) => (pr.id === prId ? { ...pr, status: 'rfq_initiated' } : pr))
     );
-    addAuditLog('RFQ_INITIATED', 'RFQ', rfqCode, `Tender opened for ${pr.code} with deadline ${deadline}`);
+
+    addAuditLog('RFQ_INITIATED', 'RFQ', rfqCode, `RFQ initiated from ${targetPR.code} with target cap: $${targetPR.totalAmount.toLocaleString()}`);
+    addNotification('RFQ Tender Sourcing Live', `Tender ${rfqCode} opened for ${targetPR.title}. Vendors invited.`, 'info', 'quotations');
   };
 
   const awardQuotationBid = (rfqId: string, bidId: string) => {
@@ -331,7 +518,6 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
     const winningBid = targetRfq.bids.find((b) => b.id === bidId);
     if (!winningBid) return;
 
-    // Update RFQ status
     setRfqs((prev) =>
       prev.map((r) =>
         r.id === rfqId
@@ -377,20 +563,18 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
       deliveryStatus: 'processing',
       matchingStatus: 'pending_invoice',
       issueDate: new Date().toISOString().substring(0, 10),
-      expectedDeliveryDate: new Date(Date.now() + winningBid.deliveryDays * 86400000)
-        .toISOString()
-        .substring(0, 10),
-      shippingAddress: '450 Innovation Parkway, Bldg 4, San Francisco, CA 94105',
+      expectedDeliveryDate: new Date(Date.now() + winningBid.deliveryDays * 86400000).toISOString().substring(0, 10),
+      shippingAddress: '450 Innovation Parkway, Receiving Bay 4, San Francisco, CA',
     };
 
     setPurchaseOrders((prev) => [newPO, ...prev]);
 
-    // Create logistics shipment
+    // Auto-generate Delivery tracking
     const newDelivery: DeliveryShipment = {
       id: `del-${Date.now()}`,
       poNumber,
-      trackingNumber: `EXP-${Math.floor(10000000 + Math.random() * 89999999)}`,
-      carrier: 'DHL Express Freight',
+      trackingNumber: `FX-TRK-${Math.floor(100000 + Math.random() * 899999)}`,
+      carrier: 'FedEx Express Freight',
       vendorName: winningBid.vendorName,
       status: 'in_transit',
       estimatedDelivery: newPO.expectedDeliveryDate,
@@ -419,12 +603,20 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
       poNumber,
       `Awarded to ${winningBid.vendorName} ($${winningBid.quotedAmount.toLocaleString()}). PO generated automatically.`
     );
+    addNotification(
+      'Contract Awarded & PO Issued',
+      `PO ${poNumber} generated for ${winningBid.vendorName} ($${winningBid.quotedAmount.toLocaleString()}).`,
+      'success',
+      'orders'
+    );
   };
 
   const verifyDeliveryQC = (deliveryId: string) => {
+    let targetPoNumber = '';
     setDeliveries((prev) =>
       prev.map((d) => {
         if (d.id !== deliveryId) return d;
+        targetPoNumber = d.poNumber;
         addAuditLog('QC_INSPECTION_PASSED', 'DELIVERY', d.poNumber, `Quality inspection completed. 3-Way Match verified.`);
         return {
           ...d,
@@ -449,6 +641,13 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
         return po;
       })
     );
+
+    addNotification(
+      '3-Way Match Inspection Verified',
+      `Receiving inspection passed for ${targetPoNumber || 'delivery'}. Payment release authorized.`,
+      'success',
+      'deliveries'
+    );
   };
 
   return (
@@ -470,6 +669,14 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
         deliveries,
         vendors,
         auditLogs,
+        notifications,
+        unreadNotificationsCount,
+        markNotificationAsRead,
+        markAllNotificationsAsRead,
+        clearNotifications,
+        addNotification,
+        forgotPassword,
+        resetPasswordWithOtp,
         searchQuery,
         setSearchQuery,
         activeView,
