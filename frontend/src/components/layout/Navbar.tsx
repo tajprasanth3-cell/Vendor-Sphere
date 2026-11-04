@@ -3,7 +3,6 @@ import {
   Search, 
   Plus, 
   Bell, 
-  UserCheck,
   Sun,
   Moon,
   Menu,
@@ -18,9 +17,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { useProcurement } from '../../context/ProcurementContext';
-import { APP_CONFIG } from '../../config';
 import { Button } from '../common/Button';
-import { UserRole } from '../../types';
 
 interface NavbarProps {
   onOpenCreateModal: () => void;
@@ -29,7 +26,6 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateModal }) => {
   const { 
     role, 
-    setRole, 
     theme, 
     toggleTheme, 
     searchQuery, 
@@ -42,9 +38,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateModal }) => {
     markNotificationAsRead,
     markAllNotificationsAsRead,
     clearNotifications,
-    setActiveView,
-    isBackendConnected,
-    dbProviderInfo
+    setActiveView
   } = useProcurement();
 
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -159,7 +153,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateModal }) => {
         </div>
       )}
 
-      {/* Right Controls: Theme Toggle, Role Switcher, Notifications & CTA */}
+      {/* Right Controls: Theme Toggle, Notifications, User Profile & CTA */}
       <div className="flex items-center gap-1.5 sm:gap-2.5 ml-auto">
         {/* Light / Dark Mode Toggle */}
         <button
@@ -174,38 +168,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateModal }) => {
             <Moon className="w-4 h-4 text-slate-700" />
           )}
         </button>
-
-        {/* Backend & MongoDB Atlas Connection Status */}
-        <div 
-          className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border bg-slate-100/80 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800 shrink-0"
-          title={isBackendConnected ? `Backend API Online | Database: ${dbProviderInfo?.provider || 'MongoDB Atlas'}` : 'Operating in local cache mode'}
-        >
-          <span className={`w-2 h-2 rounded-full ${isBackendConnected ? 'bg-emerald-500 shadow-sm shadow-emerald-500/50' : 'bg-amber-400'}`} />
-          <span className="text-slate-700 dark:text-slate-300 font-medium">
-            {isBackendConnected ? (dbProviderInfo?.provider || 'MongoDB') : 'Local Cache'}
-          </span>
-        </div>
-
-        {/* Role Selector */}
-        <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-lg px-2 sm:px-2.5 py-1.5 shrink-0">
-          <UserCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 dark:text-blue-400 shrink-0" />
-          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium hidden md:inline">Role:</span>
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value as UserRole)}
-            className="bg-transparent text-[11px] sm:text-xs font-semibold text-slate-800 dark:text-white focus:outline-none cursor-pointer pr-1"
-          >
-            {APP_CONFIG.roles.map((r) => (
-              <option 
-                key={r.id} 
-                value={r.id} 
-                className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200"
-              >
-                {r.label}
-              </option>
-            ))}
-          </select>
-        </div>
 
         {/* Create Purchase Requisition CTA */}
         <Button
