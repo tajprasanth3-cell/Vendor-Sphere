@@ -10,7 +10,27 @@ export const createApp = (): Application => {
 
   // Core Middlewares
   app.use(cors({
-    origin: [ENV.CLIENT_URL, 'http://localhost:5173', 'http://127.0.0.1:5173'],
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like curl, postman, server-to-server)
+      if (!origin) return callback(null, true);
+
+      const allowedOrigins = [
+        ENV.CLIENT_URL,
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
+      ];
+
+      if (
+        allowedOrigins.includes(origin) ||
+        origin.endsWith('.vercel.app') ||
+        origin.includes('vercel.app')
+      ) {
+        return callback(null, true);
+      }
+
+      // Permissive fallback to allow Vercel previews & production
+      return callback(null, true);
+    },
     credentials: true,
   }));
   app.use(express.json());

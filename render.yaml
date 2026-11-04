@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: vendorsphere-backend
+    env: node
+    plan: free
+    region: oregon
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 24h
+      - key: MONGODB_URI
+        value: mongodb+srv://tajprasanth3_db_user:vendorsphere@cluster0.j1tscun.mongodb.net/vendorsphere?retryWrites=true&w=majority
+      - key: CLIENT_URL
+        value: https://frontend-two-ruddy-47.vercel.app
