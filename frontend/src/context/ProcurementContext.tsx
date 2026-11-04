@@ -164,17 +164,46 @@ interface ProcurementContextType {
 
 const ProcurementContext = createContext<ProcurementContextType | undefined>(undefined);
 
+// Helper function to return initial role-filtered data
+const getInitialPRs = (role: UserRole): PurchaseRequest[] => {
+  if (role === 'vendor') return [];
+  if (role === 'requester') {
+    return INITIAL_PURCHASE_REQUESTS.filter(p => 
+      p.department.toLowerCase().includes('infra') || 
+      p.department.toLowerCase().includes('devops') ||
+      p.department.toLowerCase().includes('engineering')
+    );
+  }
+  return INITIAL_PURCHASE_REQUESTS;
+};
+
+const getInitialPOs = (role: UserRole): PurchaseOrder[] => {
+  if (role === 'vendor') {
+    return INITIAL_PURCHASE_ORDERS.filter(po => po.vendorId === 'ven-1' || po.vendorName.toLowerCase().includes('apex'));
+  }
+  return INITIAL_PURCHASE_ORDERS;
+};
+
+const getInitialDeliveries = (role: UserRole): DeliveryShipment[] => {
+  if (role === 'vendor') {
+    return INITIAL_DELIVERIES.filter(d => d.vendorName.toLowerCase().includes('apex'));
+  }
+  return INITIAL_DELIVERIES;
+};
+
+const getInitialVendors = (role: UserRole): Vendor[] => {
+  if (role === 'vendor') {
+    return INITIAL_VENDORS.filter(v => v.id === 'ven-1');
+  }
+  return INITIAL_VENDORS;
+};
+
+const getInitialAudits = (role: UserRole): AuditLog[] => {
+  if (role === 'vendor' || role === 'requester') return [];
+  return INITIAL_AUDIT_LOGS;
+};
+
 export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [role, setRoleState] = useState<UserRole>('procurement_manager');
-  const [activeView, setActiveView] = useState<string>('dashboard');
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState<boolean>(false);
-
-  // Backend connection status
-  const [isBackendConnected, setIsBackendConnected] = useState<boolean>(false);
-  const [dbProviderInfo, setDbProviderInfo] = useState<{ provider: string; connected: boolean; host?: string } | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
   // Auth state with local persistence
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => {
     const savedUser = localStorage.getItem('vendorsphere_user');
@@ -188,17 +217,38 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
     return DEMO_ACCOUNTS.procurement_manager;
   });
 
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return localStorage.getItem('vendorsphere_auth') === 'true' || true;
+  // Role correctly mirrors currentUser.role
+  const [role, setRoleState] = useState<UserRole>(() => {
+    const savedUser = localStorage.getItem('vendorsphere_user');
+    if (savedUser) {
+      try {
+        const u = JSON.parse(savedUser);
+        if (u.role) return u.role as UserRole;
+      } catch (e) {}
+    }
+    return 'procurement_manager';
   });
 
-  // Core procurement collections
-  const [purchaseRequests, setPurchaseRequests] = useState<PurchaseRequest[]>(INITIAL_PURCHASE_REQUESTS);
+  const [activeView, setActiveView] = useState<string>('dashboard');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState<boolean>(false);
+
+  // Backend connection status
+  const [isBackendConnected, setIsBackendConnected] = useState<boolean>(false);
+  const [dbProviderInfo, setDbProviderInfo] = useState<{ provider: string; connected: boolean; host?: string } | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return localStorage.getItem('vendorsphere_auth') === 'true';
+  });
+
+  // Core procurement collections - initialized based on active role
+  const [purchaseRequests, setPurchaseRequests] = useState<PurchaseRequest[]>(() => getInitialPRs(role));
   const [rfqs, setRfqs] = useState<RFQ[]>(INITIAL_RFQS);
-  const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>(INITIAL_PURCHASE_ORDERS);
-  const [deliveries, setDeliveries] = useState<DeliveryShipment[]>(INITIAL_DELIVERIES);
-  const [vendors, setVendors] = useState<Vendor[]>(INITIAL_VENDORS);
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>(INITIAL_AUDIT_LOGS);
+  const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>(() => getInitialPOs(role));
+  const [deliveries, setDeliveries] = useState<DeliveryShipment[]>(() => getInitialDeliveries(role));
+  const [vendors, setVendors] = useState<Vendor[]>(() => getInitialVendors(role));
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>(() => getInitialAudits(role));
 
   // Theme setup with persistence
   const [theme, setTheme] = useState<ThemeMode>(() => {
@@ -292,7 +342,7 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
     setNotifications([]);
   };
 
-  // Primary function to fetch backend data
+  // Primary function to fetch backend data - respecting role-based filtering
   const loadBackendData = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -318,23 +368,26 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
         api.getAuditLogs(),
       ]);
 
-      if (prsRes.status === 'fulfilled' && prsRes.value.length > 0) {
+      if (prsRes.status === 'fulfilled') {
         setPurchaseRequests(prsRes.value);
       }
-      if (rfqsRes.status === 'fulfilled' && rfqsRes.value.length > 0) {
+      if (rfqsRes.status === 'fulfilled') {
         setRfqs(rfqsRes.value);
       }
-      if (ordersRes.status === 'fulfilled' && ordersRes.value.length > 0) {
+      if (ordersRes.status === 'fulfilled') {
         setPurchaseOrders(ordersRes.value);
       }
-      if (delsRes.status === 'fulfilled' && delsRes.value.length > 0) {
+      if (delsRes.status === 'fulfilled') {
         setDeliveries(delsRes.value);
       }
-      if (vendsRes.status === 'fulfilled' && vendsRes.value.length > 0) {
+      if (vendsRes.status === 'fulfilled') {
         setVendors(vendsRes.value);
       }
-      if (auditsRes.status === 'fulfilled' && auditsRes.value.length > 0) {
+      if (auditsRes.status === 'fulfilled') {
         setAuditLogs(auditsRes.value);
+      } else {
+        // Forbidden for vendors / requesters
+        setAuditLogs([]);
       }
     } catch (err) {
       console.warn('Backend sync note: Operating in resilient cache mode', err);
@@ -345,8 +398,10 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   // Fetch from backend when mounted or auth status ready
   useEffect(() => {
-    loadBackendData();
-  }, [loadBackendData]);
+    if (isAuthenticated) {
+      loadBackendData();
+    }
+  }, [isAuthenticated, role, loadBackendData]);
 
   const setRole = (newRole: UserRole) => {
     setRoleState(newRole);
@@ -354,8 +409,14 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
       const u = DEMO_ACCOUNTS[newRole];
       setCurrentUser(u);
       localStorage.setItem('vendorsphere_user', JSON.stringify(u));
+      // Reset data to that role's scope immediately
+      setPurchaseRequests(getInitialPRs(newRole));
+      setPurchaseOrders(getInitialPOs(newRole));
+      setDeliveries(getInitialDeliveries(newRole));
+      setVendors(getInitialVendors(newRole));
+      setAuditLogs(getInitialAudits(newRole));
       // Re-authenticate silently with backend
-      api.login(newRole).catch(() => {});
+      api.login(newRole).then(() => loadBackendData()).catch(() => {});
     }
   };
 
@@ -371,6 +432,20 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
       }
     }
 
+    setCurrentUser(targetUser);
+    setRoleState(targetUser.role);
+    setIsAuthenticated(true);
+    localStorage.setItem('vendorsphere_auth', 'true');
+    localStorage.setItem('vendorsphere_user', JSON.stringify(targetUser));
+
+    // Reset initial collections to that user's role scope
+    setPurchaseRequests(getInitialPRs(targetUser.role));
+    setPurchaseOrders(getInitialPOs(targetUser.role));
+    setDeliveries(getInitialDeliveries(targetUser.role));
+    setVendors(getInitialVendors(targetUser.role));
+    setAuditLogs(getInitialAudits(targetUser.role));
+    setActiveView('dashboard');
+
     try {
       const res = await api.login(roleOrEmail, password);
       if (res.user) {
@@ -381,19 +456,16 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
           role: res.user.role as UserRole,
           department: res.user.department,
         };
+        setCurrentUser(targetUser);
+        setRoleState(targetUser.role);
+        localStorage.setItem('vendorsphere_user', JSON.stringify(targetUser));
       }
       setIsBackendConnected(true);
       await loadBackendData();
     } catch {
-      // Resilient local login if backend is unreachable
       console.warn('Backend authentication endpoint offline. Falling back to local authentication.');
     }
 
-    setCurrentUser(targetUser);
-    setRoleState(targetUser.role);
-    setIsAuthenticated(true);
-    localStorage.setItem('vendorsphere_auth', 'true');
-    localStorage.setItem('vendorsphere_user', JSON.stringify(targetUser));
     return true;
   };
 
@@ -407,7 +479,6 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
     try {
       return await api.forgotPassword(emailToReset);
     } catch {
-      // Fallback
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
       return {
         success: true,
@@ -425,7 +496,6 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
     try {
       return await api.resetPassword(email, otp, newPassword);
     } catch {
-      // Fallback
       if (!otp || otp.trim().length !== 6) {
         return { success: false, message: 'Invalid 6-digit verification code.' };
       }
@@ -484,12 +554,10 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
       ],
     };
 
-    // Optimistic UI update
     setPurchaseRequests((prev) => [newPR, ...prev]);
     addAuditLog('PR_CREATED', 'PR', prCode, `New Requisition filed for ${data.department}: $${totalAmount.toLocaleString()}`);
     addNotification('New Requisition Submitted', `Requisition ${prCode} filed for ${data.department} ($${totalAmount.toLocaleString()}).`, 'info', 'requests');
 
-    // Sync with backend API
     try {
       const created = await api.createPurchaseRequest(data);
       if (created) {
@@ -538,7 +606,6 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
     addAuditLog('PR_APPROVED', 'PR', prCode || prId, `Approval milestone signed by ${currentUser?.name || 'Elena Rostova'}`);
     addNotification('Requisition Approved', `Requisition ${prCode || prId} authorized to next workflow tier.`, 'success', 'requests');
 
-    // Sync with backend
     try {
       await api.approvePurchaseRequest(prId, comments);
     } catch (e) {
@@ -576,7 +643,6 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
     addAuditLog('PR_REJECTED', 'PR', prCode || prId, `Requisition rejected. Reason: ${comments}`);
     addNotification('Requisition Rejected', `Requisition ${prCode || prId} declined: ${comments}`, 'alert', 'requests');
 
-    // Sync with backend
     try {
       await api.rejectPurchaseRequest(prId, comments);
     } catch (e) {
@@ -628,7 +694,6 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
     addAuditLog('RFQ_INITIATED', 'RFQ', rfqCode, `RFQ initiated from ${targetPR.code} with target cap: $${targetPR.totalAmount.toLocaleString()}`);
     addNotification('RFQ Tender Sourcing Live', `Tender ${rfqCode} opened for ${targetPR.title}. Vendors invited.`, 'info', 'quotations');
 
-    // Sync with backend
     try {
       const createdRfq = await api.createRFQ(prId, deadline);
       if (createdRfq) {
@@ -663,7 +728,6 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
       )
     );
 
-    // Auto-generate Purchase Order
     const poNumber = `PO-2026-${Math.floor(8000 + Math.random() * 1999)}`;
     const newPO: PurchaseOrder = {
       id: `po-${Date.now()}`,
@@ -697,7 +761,6 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     setPurchaseOrders((prev) => [newPO, ...prev]);
 
-    // Auto-generate Delivery tracking
     const newDelivery: DeliveryShipment = {
       id: `del-${Date.now()}`,
       poNumber,
@@ -738,7 +801,6 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
       'orders'
     );
 
-    // Sync with backend
     try {
       await api.awardBid(rfqId, bidId);
     } catch (e) {
@@ -762,7 +824,6 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
       })
     );
 
-    // Update corresponding PO to inspected
     setPurchaseOrders((prev) =>
       prev.map((po) => {
         const del = deliveries.find((d) => d.id === deliveryId);
@@ -784,7 +845,6 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
       'deliveries'
     );
 
-    // Sync with backend
     try {
       await api.verifyDeliveryQC(deliveryId);
     } catch (e) {

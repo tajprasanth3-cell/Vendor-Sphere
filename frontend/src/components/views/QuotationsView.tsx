@@ -9,7 +9,10 @@ import {
   Award, 
   Sparkles, 
   Clock, 
-  TrendingDown
+  TrendingDown,
+  ShieldAlert,
+  Send,
+  Lock
 } from 'lucide-react';
 
 export const QuotationsView: React.FC = () => {
@@ -25,10 +28,12 @@ export const QuotationsView: React.FC = () => {
         <div>
           <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
             <Layers className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            Vendor Quotations & RFQ Evaluation Matrix
+            {role === 'vendor' ? 'Open Tenders & Quotation Bids' : 'Vendor Quotations & RFQ Evaluation Matrix'}
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Side-by-side comparative scoring, commercial terms analysis, and vendor selection.
+            {role === 'vendor'
+              ? 'Review open competitive tenders and manage your commercial quotations.'
+              : 'Side-by-side comparative scoring, commercial terms analysis, and vendor selection.'}
           </p>
         </div>
       </div>
@@ -79,26 +84,28 @@ export const QuotationsView: React.FC = () => {
               </div>
             </div>
 
-            {/* AI Sourcing Recommendation Insight */}
-            <div className="mt-4 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-500/20 rounded-lg p-3 sm:p-3.5 flex items-start gap-2.5 sm:gap-3">
-              <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-              <div className="text-xs text-slate-700 dark:text-slate-300">
-                <strong className="text-slate-900 dark:text-white font-semibold">Evaluation Recommendation: </strong>
-                Apex Cloud Solutions Inc. scored the highest overall weighted evaluation (95.3/100)
-                by delivering a competitive price ($82,500 vs $90k target cap), fastest delivery SLA (5
-                days), and 98% quality compliance track record.
+            {/* AI Sourcing Recommendation Insight (Internal Procurement Only) */}
+            {role !== 'vendor' && (
+              <div className="mt-4 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-500/20 rounded-lg p-3 sm:p-3.5 flex items-start gap-2.5 sm:gap-3">
+                <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                <div className="text-xs text-slate-700 dark:text-slate-300">
+                  <strong className="text-slate-900 dark:text-white font-semibold">Evaluation Recommendation: </strong>
+                  Apex Cloud Solutions Inc. scored the highest overall weighted evaluation (95.3/100)
+                  by delivering a competitive price ($82,500 vs $90k target cap), fastest delivery SLA (5
+                  days), and 98% quality compliance track record.
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Quotation Comparison Sheet Grid */}
           <div className="space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
               <h3 className="text-sm font-semibold text-slate-900 dark:text-white tracking-tight">
-                Comparative Bid Offers ({activeRfq.bids.length} Suppliers Responded)
+                {role === 'vendor' ? 'Commercial Bid Proposals' : `Comparative Bid Offers (${activeRfq.bids.length} Suppliers Responded)`}
               </h3>
               <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">
-                Weights: 40% Pricing, 30% SLA/Speed, 30% Reliability
+                {role === 'vendor' ? 'Confidential Supplier Tendering' : 'Weights: 40% Pricing, 30% SLA/Speed, 30% Reliability'}
               </span>
             </div>
 
@@ -115,12 +122,13 @@ export const QuotationsView: React.FC = () => {
                   const isDisqualified = bid.status === 'disqualified';
                   const isUnderBudget = bid.quotedAmount <= activeRfq.targetBudget;
                   const savings = activeRfq.targetBudget - bid.quotedAmount;
+                  const isCompetitorMasked = role === 'vendor' && bid.quotedAmount === 0;
 
                   return (
                     <div
                       key={bid.id}
                       className={`relative rounded-xl border p-4 sm:p-5 flex flex-col justify-between transition-all shadow-xs ${
-                        bid.isRecommended
+                        bid.isRecommended && role !== 'vendor'
                           ? 'bg-white dark:bg-slate-900/90 border-blue-400 dark:border-blue-500/50 ring-1 ring-blue-500/20'
                           : isAwarded
                           ? 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-500/40'
@@ -128,7 +136,7 @@ export const QuotationsView: React.FC = () => {
                       }`}
                     >
                       {/* Top Pill */}
-                      {bid.isRecommended && (
+                      {bid.isRecommended && role !== 'vendor' && (
                         <div className="absolute -top-3 left-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-sm">
                           <Sparkles className="w-3 h-3" />
                           BEST VALUE WINNER
@@ -139,11 +147,22 @@ export const QuotationsView: React.FC = () => {
                         {/* Vendor Name & Rating */}
                         <div>
                           <div className="flex items-center justify-between mb-1">
-                            <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">Supplier Offer</span>
-                            <span className="text-xs font-bold text-amber-500 dark:text-amber-400">★ {bid.vendorRating}</span>
+                            <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                              {isCompetitorMasked ? 'Sealed Tender Offer' : 'Supplier Offer'}
+                            </span>
+                            {!isCompetitorMasked && (
+                              <span className="text-xs font-bold text-amber-500 dark:text-amber-400">★ {bid.vendorRating}</span>
+                            )}
                           </div>
-                          <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight">
-                            {bid.vendorName}
+                          <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-1.5">
+                            {isCompetitorMasked ? (
+                              <>
+                                <Lock className="w-3.5 h-3.5 text-slate-400" />
+                                <span>{bid.vendorName}</span>
+                              </>
+                            ) : (
+                              bid.vendorName
+                            )}
                           </h4>
                           <span className="text-[11px] text-slate-500 dark:text-slate-400">Submitted: {bid.submittedAt}</span>
                         </div>
@@ -151,21 +170,29 @@ export const QuotationsView: React.FC = () => {
                         {/* Price Quote */}
                         <div className="bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800/80 rounded-lg p-3">
                           <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider block">
-                            Quoted Total
+                            Quoted Commercial Value
                           </span>
                           <div className="flex items-baseline gap-2 flex-wrap">
-                            <span className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
-                              {formatCurrency(bid.quotedAmount)}
-                            </span>
-                            {isUnderBudget ? (
-                              <span className="text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold flex items-center gap-0.5">
-                                <TrendingDown className="w-3 h-3" />
-                                Save {formatCurrency(savings)}
+                            {isCompetitorMasked ? (
+                              <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 italic">
+                                [Sealed Confidential Pricing]
                               </span>
                             ) : (
-                              <span className="text-[11px] text-rose-700 dark:text-rose-400 font-semibold">
-                                +{formatCurrency(Math.abs(savings))} Over
-                              </span>
+                              <>
+                                <span className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
+                                  {formatCurrency(bid.quotedAmount)}
+                                </span>
+                                {isUnderBudget ? (
+                                  <span className="text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold flex items-center gap-0.5">
+                                    <TrendingDown className="w-3 h-3" />
+                                    Save {formatCurrency(savings)}
+                                  </span>
+                                ) : (
+                                  <span className="text-[11px] text-rose-700 dark:text-rose-400 font-semibold">
+                                    +{formatCurrency(Math.abs(savings))} Over
+                                  </span>
+                                )}
+                              </>
                             )}
                           </div>
                         </div>
@@ -184,10 +211,12 @@ export const QuotationsView: React.FC = () => {
                             <span className="text-slate-500 dark:text-slate-400">Warranty Coverage:</span>
                             <strong className="text-slate-800 dark:text-white">{bid.warrantyPeriodMonths} Months</strong>
                           </div>
-                          <div className="flex justify-between py-1 border-b border-slate-200 dark:border-slate-800/80">
-                            <span className="text-slate-500 dark:text-slate-400">Vendor Compliance Score:</span>
-                            <strong className="text-blue-600 dark:text-blue-400">{bid.complianceScore}%</strong>
-                          </div>
+                          {bid.complianceScore > 0 && (
+                            <div className="flex justify-between py-1 border-b border-slate-200 dark:border-slate-800/80">
+                              <span className="text-slate-500 dark:text-slate-400">Vendor Compliance Score:</span>
+                              <strong className="text-blue-600 dark:text-blue-400">{bid.complianceScore}%</strong>
+                            </div>
+                          )}
                         </div>
 
                         {/* Bid Notes */}
@@ -206,6 +235,10 @@ export const QuotationsView: React.FC = () => {
                         ) : isDisqualified ? (
                           <div className="w-full py-2 text-slate-400 dark:text-slate-500 text-xs font-medium text-center">
                             Bid Disqualified
+                          </div>
+                        ) : role === 'vendor' ? (
+                          <div className="w-full py-2 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 text-xs font-semibold rounded-lg text-center border border-blue-200 dark:border-blue-800">
+                            {isCompetitorMasked ? 'Sealed Competitor Bid' : 'Your Active Commercial Proposal'}
                           </div>
                         ) : (
                           <Button

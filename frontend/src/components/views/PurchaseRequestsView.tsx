@@ -35,6 +35,21 @@ export const PurchaseRequestsView: React.FC<PurchaseRequestsViewProps> = ({ onOp
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [expandedPRId, setExpandedPRId] = useState<string | null>('pr-1');
 
+  if (role === 'vendor') {
+    return (
+      <div className="p-8 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl space-y-3">
+        <AlertCircle className="w-10 h-10 text-amber-500 mx-auto" />
+        <h3 className="text-base font-bold text-slate-900 dark:text-white">Internal Department Requisitions Restricted</h3>
+        <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+          Purchase requisitions contain confidential internal departmental budgets and are restricted to enterprise employees. As a vendor partner, you can access and submit bids on Open Tenders (RFQs).
+        </p>
+        <Button variant="primary" size="md" onClick={() => setActiveView('quotations')}>
+          Go to Open Tenders (RFQs)
+        </Button>
+      </div>
+    );
+  }
+
   const totalCount = purchaseRequests.length;
   const pendingCount = purchaseRequests.filter(
     (pr) => pr.status === 'pending_dept_approval' || pr.status === 'pending_procurement_review'

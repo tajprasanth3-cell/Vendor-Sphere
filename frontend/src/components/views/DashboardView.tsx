@@ -14,7 +14,12 @@ import {
   ChevronRight,
   TrendingUp,
   ShieldCheck,
-  CheckCircle2
+  CheckCircle2,
+  PackageCheck,
+  ShoppingBag,
+  Star,
+  Send,
+  AlertCircle
 } from 'lucide-react';
 
 interface DashboardViewProps {
@@ -30,9 +35,361 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onOpenCreatePR }) 
     vendors, 
     approvePurchaseRequest, 
     role, 
+    currentUser,
     setActiveView 
   } = useProcurement();
 
+  // ==========================================
+  // 1. VENDOR PORTAL VIEW
+  // ==========================================
+  if (role === 'vendor') {
+    const openRfqs = rfqs.filter((r) => r.status === 'open');
+    const awardedPOs = purchaseOrders;
+    const totalAwardedValue = awardedPOs.reduce((sum, po) => sum + po.totalAmount, 0);
+    const activeShipments = deliveries.filter((d) => !d.qcPassed);
+
+    return (
+      <div className="procurement-overview w-full max-w-full overflow-x-hidden space-y-4 sm:space-y-6">
+        {/* Vendor Hero Banner */}
+        <div className="bg-gradient-to-r from-emerald-50 via-teal-50/40 to-white dark:from-slate-900 dark:via-slate-900 dark:to-emerald-950/30 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 relative overflow-hidden shadow-xs">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="space-y-1.5 min-w-0">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 mb-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse shrink-0" />
+                <span>Supplier Partner Portal</span>
+              </div>
+              <h2 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+                {currentUser?.department || 'Apex Cloud Solutions Inc.'}
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed">
+                Welcome, {currentUser?.name}. Review open competitive tenders, submit sealed quotation bids, and track order fulfillment.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2.5 shrink-0">
+              <Button
+                variant="primary"
+                size="md"
+                onClick={() => setActiveView('quotations')}
+                className="w-full sm:w-auto justify-center min-h-[38px] text-xs font-semibold"
+              >
+                <Layers className="w-4 h-4 mr-1.5" />
+                View Open Tenders ({openRfqs.length})
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Vendor KPI Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+          <StatCard
+            title="Open Tenders"
+            value={openRfqs.length.toString()}
+            subtitle="Available for Quotation"
+            icon={<Layers className="w-5 h-5 text-blue-600" />}
+            change="Active Now"
+            isPositive={true}
+          />
+          <StatCard
+            title="Awarded PO Value"
+            value={formatCurrency(totalAwardedValue)}
+            subtitle={`${awardedPOs.length} Official Purchase Orders`}
+            icon={<ShoppingBag className="w-5 h-5 text-emerald-600" />}
+            change="Contracted"
+            isPositive={true}
+          />
+          <StatCard
+            title="Active Shipments"
+            value={activeShipments.length.toString()}
+            subtitle="In Transit to Client Dock"
+            icon={<Truck className="w-5 h-5 text-indigo-600" />}
+            change="On-Time Track"
+            isPositive={true}
+          />
+          <StatCard
+            title="Supplier Score"
+            value="4.9 ★"
+            subtitle="98% Quality Compliance"
+            icon={<Star className="w-5 h-5 text-amber-500" />}
+            change="Preferred Tier"
+            isPositive={true}
+          />
+        </div>
+
+        {/* Vendor Two-Column Workspaces */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          {/* Left: Open RFQ Tenders Awaiting Bid */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 space-y-4 shadow-xs">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Layers className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+                  Tenders Awaiting Your Bid ({openRfqs.length})
+                </h3>
+              </div>
+              <button
+                onClick={() => setActiveView('quotations')}
+                className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium flex items-center gap-1 cursor-pointer"
+              >
+                <span>Full Matrix</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {openRfqs.length === 0 ? (
+                <div className="p-6 text-center text-slate-400 text-xs">
+                  No open tenders at this time.
+                </div>
+              ) : (
+                openRfqs.map((rfq) => (
+                  <div
+                    key={rfq.id}
+                    className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40 space-y-2 hover:border-blue-400 transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs font-bold text-blue-600 dark:text-blue-400">{rfq.code}</span>
+                      <span className="text-[11px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 rounded font-medium border border-amber-200 dark:border-amber-800">
+                        Deadline: {rfq.deadline}
+                      </span>
+                    </div>
+                    <h4 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">{rfq.title}</h4>
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="text-xs text-slate-500">Cap Budget: <strong className="text-slate-900 dark:text-white">{formatCurrency(rfq.targetBudget)}</strong></span>
+                      <Button
+                        size="sm"
+                        variant="primary"
+                        onClick={() => setActiveView('quotations')}
+                        className="text-xs"
+                      >
+                        Submit / Update Bid
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Right: Dispatched Purchase Orders */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 space-y-4 shadow-xs">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ShoppingBag className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+                  Purchase Orders to Fulfill ({awardedPOs.length})
+                </h3>
+              </div>
+              <button
+                onClick={() => setActiveView('orders')}
+                className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium flex items-center gap-1 cursor-pointer"
+              >
+                <span>View Orders</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {awardedPOs.length === 0 ? (
+                <div className="p-6 text-center text-slate-400 text-xs">
+                  No active purchase orders at this time.
+                </div>
+              ) : (
+                awardedPOs.map((po) => (
+                  <div
+                    key={po.id}
+                    className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40 space-y-1.5"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400">{po.poNumber}</span>
+                      <Badge status={po.deliveryStatus} size="sm" />
+                    </div>
+                    <div className="text-xs text-slate-600 dark:text-slate-300">
+                      Total: <strong className="text-slate-900 dark:text-white">{formatCurrency(po.totalAmount)}</strong> • Terms: {po.paymentTerms}
+                    </div>
+                    <div className="text-[11px] text-slate-500">
+                      Expected Delivery: {po.expectedDeliveryDate}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // 2. REQUESTER WORKSPACE VIEW
+  // ==========================================
+  if (role === 'requester') {
+    const myPRs = purchaseRequests;
+    const pendingMyPRs = myPRs.filter((p) => p.status.includes('pending'));
+    const approvedMyPRs = myPRs.filter((p) => p.status === 'approved' || p.status === 'rfq_initiated');
+    const myDeliveries = deliveries;
+
+    return (
+      <div className="procurement-overview w-full max-w-full overflow-x-hidden space-y-4 sm:space-y-6">
+        {/* Requester Hero Banner */}
+        <div className="bg-gradient-to-r from-indigo-50 via-blue-50/40 to-white dark:from-slate-900 dark:via-slate-900 dark:to-indigo-950/30 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 relative overflow-hidden shadow-xs">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="space-y-1.5 min-w-0">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-indigo-100 text-indigo-800 dark:bg-indigo-500/10 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 mb-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400 animate-pulse shrink-0" />
+                <span>Department Requester Portal</span>
+              </div>
+              <h2 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+                {currentUser?.name} — {currentUser?.department || 'Infrastructure & DevOps'}
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed">
+                Create new purchase requisitions, monitor department budget approvals, and inspect incoming warehouse deliveries.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2.5 shrink-0">
+              <Button
+                variant="primary"
+                size="md"
+                onClick={onOpenCreatePR}
+                className="w-full sm:w-auto justify-center min-h-[38px] text-xs font-semibold"
+              >
+                + New Purchase Requisition
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Requester KPI Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+          <StatCard
+            title="My Requisitions"
+            value={myPRs.length.toString()}
+            subtitle="Department Line Items"
+            icon={<FileText className="w-5 h-5 text-blue-600" />}
+            change="Filed"
+            isPositive={true}
+          />
+          <StatCard
+            title="Awaiting Approval"
+            value={pendingMyPRs.length.toString()}
+            subtitle="Manager & Sourcing Review"
+            icon={<Clock className="w-5 h-5 text-amber-500" />}
+            change="In Review"
+            isPositive={false}
+          />
+          <StatCard
+            title="Approved & Sourced"
+            value={approvedMyPRs.length.toString()}
+            subtitle="In Procurement Tender"
+            icon={<CheckCircle2 className="w-5 h-5 text-emerald-600" />}
+            change="Moving Ahead"
+            isPositive={true}
+          />
+          <StatCard
+            title="Shipments to Inspect"
+            value={myDeliveries.filter(d => !d.qcPassed).length.toString()}
+            subtitle="Receiving Dock QC"
+            icon={<Truck className="w-5 h-5 text-indigo-600" />}
+            change="Dock Arrival"
+            isPositive={true}
+          />
+        </div>
+
+        {/* Requester Workspaces */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          {/* Left: My Requisitions */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 space-y-4 shadow-xs">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+                  My Recent Requisitions ({myPRs.length})
+                </h3>
+              </div>
+              <button
+                onClick={() => setActiveView('requests')}
+                className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium flex items-center gap-1 cursor-pointer"
+              >
+                <span>View All</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {myPRs.map((pr) => (
+                <div
+                  key={pr.id}
+                  className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40 space-y-1.5"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs font-bold text-blue-600 dark:text-blue-400">{pr.code}</span>
+                    <Badge status={pr.status} size="sm" />
+                  </div>
+                  <h4 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">{pr.title}</h4>
+                  <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
+                    <span>Est. Budget: <strong className="text-slate-900 dark:text-white">{formatCurrency(pr.totalAmount)}</strong></span>
+                    <span>Required: {pr.requiredDate}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right: Deliveries Awaiting Inspection */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 space-y-4 shadow-xs">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Truck className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+                  Shipments for Department ({myDeliveries.length})
+                </h3>
+              </div>
+              <button
+                onClick={() => setActiveView('deliveries')}
+                className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium flex items-center gap-1 cursor-pointer"
+              >
+                <span>Receiving Dock</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {myDeliveries.map((del) => (
+                <div
+                  key={del.id}
+                  className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40 space-y-1.5"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400">{del.trackingNumber}</span>
+                    <Badge status={del.status} size="sm" />
+                  </div>
+                  <div className="text-xs text-slate-700 dark:text-slate-300">
+                    Carrier: {del.carrier} • Vendor: {del.vendorName}
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
+                    <span>Est. Arrival: {del.estimatedDelivery}</span>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => setActiveView('deliveries')}
+                      className="text-xs"
+                    >
+                      Inspect Receipt
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // 3. PROCUREMENT MANAGER & ADMIN COMMAND CENTER
+  // ==========================================
   const totalSpend = purchaseOrders.reduce((sum, po) => sum + po.totalAmount, 0);
   const pendingRequests = purchaseRequests.filter(
     (pr) => pr.status === 'pending_dept_approval' || pr.status === 'pending_procurement_review'
@@ -42,7 +399,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onOpenCreatePR }) 
     vendors.reduce((sum, v) => sum + v.onTimeDeliveryRate, 0) / (vendors.length || 1)
   ).toFixed(1);
 
-  // 8-stage enterprise workflow steps
   const workflowSteps = [
     { name: '1. Purchase Request', count: purchaseRequests.length, view: 'requests' },
     { name: '2. Review & Approval', count: pendingRequests.length, view: 'requests' },
@@ -62,7 +418,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onOpenCreatePR }) 
           <div className="space-y-1 sm:space-y-1.5 min-w-0">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 mb-0.5 max-w-full">
               <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 animate-pulse shrink-0" />
-              <span className="truncate">Enterprise Procurement Command Center</span>
+              <span className="truncate">
+                {role === 'admin' ? 'Enterprise System Governance & Compliance' : 'Enterprise Procurement Command Center'}
+              </span>
             </div>
             <h2 className="text-base sm:text-xl lg:text-2xl font-bold text-slate-900 dark:text-white tracking-tight break-words leading-snug">
               Centralized Sourcing, Approval & Logistics Management
@@ -93,64 +451,56 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onOpenCreatePR }) 
         </div>
       </div>
 
-      {/* KPI Cards Grid (High Density 2x2 on Mobile, 4-col on Desktop) */}
+      {/* KPI Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         <StatCard
           title="Spend (YTD)"
           value={formatCurrency(totalSpend)}
-          change="+14.2%"
+          subtitle="Contracted via PO"
+          icon={<DollarSign className="w-5 h-5 text-blue-600" />}
+          change="+12.4%"
           isPositive={true}
-          subtitle="Direct Capex/Opex"
-          icon={<DollarSign className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-          iconColor="text-emerald-700 bg-emerald-50 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-500/10 dark:border-emerald-500/20"
         />
         <StatCard
-          title="Pending Approvals"
+          title="Pending PRs"
           value={pendingRequests.length.toString()}
-          change={pendingRequests.length > 0 ? 'Action Req.' : 'All Clear'}
-          isPositive={pendingRequests.length === 0}
-          subtitle="Department Queue"
-          icon={<Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-          iconColor="text-amber-700 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-500/10 dark:border-amber-500/20"
+          subtitle="Requires Review"
+          icon={<Clock className="w-5 h-5 text-amber-500" />}
+          change={`${pendingRequests.length} action items`}
+          isPositive={false}
         />
         <StatCard
-          title="Active RFQs"
+          title="Active Tenders"
           value={activeRfqs.length.toString()}
-          change="3 Bids Live"
+          subtitle="RFQ Sourcing Live"
+          icon={<Layers className="w-5 h-5 text-indigo-600" />}
+          change="3 Bids per PR"
           isPositive={true}
-          subtitle="Tender Stage"
-          icon={<Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-          iconColor="text-blue-700 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-500/10 dark:border-blue-500/20"
         />
         <StatCard
-          title="On-Time Delivery"
+          title="Supplier SLA"
           value={`${avgOnTime}%`}
-          change="+2.4% SLA"
+          subtitle="On-time Delivery"
+          icon={<TrendingUp className="w-5 h-5 text-emerald-600" />}
+          change="+2.1% MoM"
           isPositive={true}
-          subtitle="Across 4 Suppliers"
-          icon={<Truck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-          iconColor="text-indigo-700 bg-indigo-50 border-indigo-200 dark:text-indigo-400 dark:bg-indigo-500/10 dark:border-indigo-500/20"
         />
       </div>
 
-      {/* Interactive Enterprise Workflow Visualizer */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 sm:p-5 space-y-2.5 sm:space-y-4 shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-          <div>
-            <h3 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white tracking-tight flex items-center gap-1.5">
-              <span>Enterprise Procurement Lifecycle Pipeline</span>
-              <span className="hidden sm:inline text-xs text-slate-500 dark:text-slate-400 font-normal">• 8 Stages</span>
+      {/* 8-Stage Procurement Workflow Pipeline */}
+      <div className="overview-pipeline-section bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 sm:p-5 space-y-3 sm:space-y-4 shadow-xs">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <ShieldCheck className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+            <h3 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white truncate">
+              Standard 8-Stage Procurement Lifecycle
             </h3>
-            <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
-              Interactive end-to-end workflow stages as defined in the Adz4needz enterprise assignment.
-            </p>
           </div>
-          <span className="text-[10px] sm:text-xs text-blue-600 dark:text-blue-400 font-medium self-start sm:self-auto">
-            Swipe or Click to Filter ➔
+          <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-mono hidden sm:inline shrink-0">
+            ISO-9001 Compliant
           </span>
         </div>
 
-        {/* Responsive Pipeline: Touch Swipe with Snap on Mobile, Clean Grid on Tablet & Desktop */}
         <div className="overview-pipeline-container no-scrollbar flex sm:grid sm:grid-cols-4 lg:grid-cols-8 gap-2 overflow-x-auto pb-1.5 sm:pb-0">
           {workflowSteps.map((step, idx) => (
             <button
@@ -218,26 +568,24 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onOpenCreatePR }) 
                     <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 block font-medium">Est. Budget</span>
                     <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">{formatCurrency(pr.totalAmount)}</span>
                   </div>
-                  {(role === 'procurement_manager' || role === 'admin') && (
-                    <div className="flex items-center gap-1.5">
-                      <Button
-                        size="sm"
-                        variant="primary"
-                        onClick={() => approvePurchaseRequest(pr.id)}
-                        className="text-xs min-h-[34px] px-2.5"
-                      >
-                        Approve
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => setActiveView('requests')}
-                        className="text-xs min-h-[34px] px-2.5"
-                      >
-                        Details
-                      </Button>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-1.5">
+                    <Button
+                      size="sm"
+                      variant="primary"
+                      onClick={() => approvePurchaseRequest(pr.id)}
+                      className="text-xs min-h-[34px] px-2.5"
+                    >
+                      Approve
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => setActiveView('requests')}
+                      className="text-xs min-h-[34px] px-2.5"
+                    >
+                      Details
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -248,34 +596,41 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onOpenCreatePR }) 
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 sm:p-5 space-y-3 sm:space-y-4 shadow-xs min-w-0">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
-              <Building2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <Building2 className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
               <h3 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white truncate">
-                Supplier Scorecard
+                Top Strategic Suppliers
               </h3>
             </div>
             <button
               onClick={() => setActiveView('vendors')}
-              className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium cursor-pointer shrink-0"
+              className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium flex items-center gap-1 cursor-pointer shrink-0"
             >
-              All Vendors
+              <span>Directory</span>
+              <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          <div className="space-y-2.5 sm:space-y-3">
-            {vendors.map((v) => (
+          <div className="space-y-3">
+            {vendors.slice(0, 4).map((vendor) => (
               <div
-                key={v.id}
-                className="bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl p-2.5 sm:p-3.5 space-y-2 hover:border-slate-300 dark:hover:border-slate-700 transition-colors min-w-0"
+                key={vendor.id}
+                className="overview-supplier-item flex items-center justify-between gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded-lg bg-slate-50/70 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
               >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="font-semibold text-xs text-slate-900 dark:text-white truncate">{v.name}</div>
-                  <span className="text-xs font-bold text-amber-500 dark:text-amber-400 shrink-0">★ {v.rating}</span>
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white truncate">
+                    {vendor.name}
+                  </div>
+                  <div className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">
+                    {vendor.category} • Rating: {vendor.rating} ★
+                  </div>
                 </div>
-                <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{v.category}</div>
-
-                <div className="pt-2 border-t border-slate-200 dark:border-slate-800/80 flex items-center justify-between gap-2 text-[11px] flex-wrap">
-                  <span className="text-slate-500 dark:text-slate-400">On-Time: <strong className="text-emerald-600 dark:text-emerald-400">{v.onTimeDeliveryRate}%</strong></span>
-                  <span className="text-slate-500 dark:text-slate-400">Spend: <strong className="text-slate-800 dark:text-slate-200">{formatCurrency(v.totalSpendYTD)}</strong></span>
+                <div className="text-right shrink-0">
+                  <div className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                    {vendor.onTimeDeliveryRate}%
+                  </div>
+                  <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
+                    On-Time SLA
+                  </div>
                 </div>
               </div>
             ))}

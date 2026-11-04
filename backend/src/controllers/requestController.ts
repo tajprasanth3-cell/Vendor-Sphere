@@ -4,8 +4,35 @@ import { AuthenticatedRequest, PurchaseRequest, LineItem } from '../types/index.
 
 export const getAllRequests = (req: AuthenticatedRequest, res: Response): void => {
   const { status, department, search } = req.query;
+  const user = req.user;
+
+  // RBAC: Vendor partners have NO access to internal enterprise purchase requisitions
+  if (user?.role === 'vendor') {
+    res.json({
+      success: true,
+      count: 0,
+      data: [],
+    });
+    return;
+  }
 
   let results = [...db.purchaseRequests];
+
+  // RBAC: Department Requester only sees requisitions submitted by them or their department
+  if (user?.role === 'requester') {
+    const userEmail = user.email.toLowerCase();
+    const userDept = (user.department || '').toLowerCase();
+    results = results.filter((p) => {
+      const matchEmail = p.requestedBy?.email?.toLowerCase() === userEmail;
+      const matchDept = userDept && (
+        p.department.toLowerCase().includes('infra') || 
+        p.department.toLowerCase().includes('devops') || 
+        p.department.toLowerCase().includes('engineering') ||
+        p.department.toLowerCase() === userDept
+      );
+      return matchEmail || matchDept;
+    });
+  }
 
   if (status && typeof status === 'string') {
     results = results.filter((p) => p.status === status);
@@ -34,6 +61,13 @@ export const getAllRequests = (req: AuthenticatedRequest, res: Response): void =
 
 export const getRequestById = (req: AuthenticatedRequest, res: Response): void => {
   const { id } = req.params;
+  const user = req.user;
+
+  if (user?.role === 'vendor') {
+    res.status(403).json({ success: false, message: 'Access denied: Vendor accounts cannot access internal requisitions.' });
+    return;
+  }
+
   const pr = db.purchaseRequests.find((p) => p.id === id || p.code === id);
 
   if (!pr) {
@@ -41,10 +75,27 @@ export const getRequestById = (req: AuthenticatedRequest, res: Response): void =
     return;
   }
 
+  // Requester check
+  if (user?.role === 'requester') {
+    const userEmail = user.email.toLowerCase();
+    const matchEmail = pr.requestedBy?.email?.toLowerCase() === userEmail;
+    const matchDept = pr.department.toLowerCase().includes('infra') || pr.department.toLowerCase().includes('devops');
+    if (!matchEmail && !matchDept) {
+      res.status(403).json({ success: false, message: 'Access denied to requisitions outside your department.' });
+      return;
+    }
+  }
+
   res.json({ success: true, data: pr });
 };
 
 export const createRequest = (req: AuthenticatedRequest, res: Response): void => {
+  const user = req.user;
+  if (user?.role === 'vendor') {
+    res.status(403).json({ success: false, message: 'Vendors cannot file internal purchase requisitions.' });
+    return;
+  }
+
   const { title, department, priority, businessJustification, requiredDate, items } = req.body;
 
   if (!title || !items || !Array.isArray(items) || items.length === 0) {
@@ -58,27 +109,27 @@ export const createRequest = (req: AuthenticatedRequest, res: Response): void =>
   const processedItems: LineItem[] = items.map((it: any, idx: number) => ({
     id: `item-${Date.now()}-${idx}`,
     name: it.name,
-    category: it.category || 'General Supplies',
+    category: it.category || 'Standard Goods',
     quantity: Number(it.quantity) || 1,
-    unit: it.unit || 'units',
+    unit: it.unit || 'unit',
     estimatedUnitPrice: Number(it.estimatedUnitPrice) || 0,
     totalPrice: (Number(it.quantity) || 1) * (Number(it.estimatedUnitPrice) || 0),
-    specifications: it.specifications,
+    specifications: it.specifications || '',
   }));
 
-  const subtotal = processedItems.reduce((acc, curr) => acc + curr.totalPrice, 0);
-  const estimatedTax = subtotal * 0.08;
+  const subtotal = processedItems.reduce((acc, it) => acc + it.totalPrice, 0);
+  const estimatedTax = Math.round(subtotal * 0.08 * 100) / 100;
   const totalAmount = subtotal + estimatedTax;
-  const prCode = `PR-2026-0${Math.floor(100 + Math.random() * 900)}`;
 
+  const prCode = `PR-2026-0${Math.floor(100 + Math.random() * 899)}`;
   const newPR: PurchaseRequest = {
     id: `pr-${Date.now()}`,
     code: prCode,
     title,
-    department: department || req.user?.department || 'Operations',
+    department: department || user?.department || 'Operations',
     requestedBy: {
-      name: req.user?.name || 'Authorized Requester',
-      email: req.user?.email || 'requester@enterprise.internal',
+      name: user?.name || 'Authorized Requester',
+      email: user?.email || 'requester@enterprise.internal',
     },
     priority: priority || 'medium',
     status: 'pending_dept_approval',
@@ -87,9 +138,9 @@ export const createRequest = (req: AuthenticatedRequest, res: Response): void =>
     estimatedTax,
     totalAmount,
     currency: 'USD',
-    businessJustification: businessJustification || 'No justification provided.',
+    businessJustification: businessJustification || 'Procurement requirement for operational continuity.',
     createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
-    requiredDate: requiredDate || '2026-12-01',
+    requiredDate: requiredDate || '2026-12-15',
     approvalChain: [
       {
         stepName: 'Department Head Approval',
@@ -115,14 +166,14 @@ export const createRequest = (req: AuthenticatedRequest, res: Response): void =>
     action: 'PR_CREATED',
     entityType: 'PR',
     entityCode: prCode,
-    user: req.user?.name || 'Requester',
-    role: (req.user?.role || 'requester').toUpperCase(),
-    details: `Requisition filed for ${newPR.department}: $${totalAmount.toLocaleString()}`,
+    user: user?.name || 'Enterprise User',
+    role: (user?.role || 'requester').toUpperCase(),
+    details: `Requisition filed for ${newPR.department} totaling $${totalAmount.toLocaleString()}`,
   });
 
   res.status(201).json({
     success: true,
-    message: 'Purchase Requisition successfully submitted for multi-level review.',
+    message: `Purchase Requisition ${prCode} created successfully.`,
     data: newPR,
   });
 };
@@ -130,68 +181,88 @@ export const createRequest = (req: AuthenticatedRequest, res: Response): void =>
 export const approveRequestStep = (req: AuthenticatedRequest, res: Response): void => {
   const { id } = req.params;
   const { comments } = req.body;
+  const user = req.user;
 
-  const pr = db.purchaseRequests.find((p) => p.id === id);
+  if (user?.role !== 'procurement_manager' && user?.role !== 'admin') {
+    res.status(403).json({ success: false, message: 'Forbidden: Insufficient privileges to approve requisitions.' });
+    return;
+  }
+
+  const pr = db.purchaseRequests.find((p) => p.id === id || p.code === id);
   if (!pr) {
     res.status(404).json({ success: false, message: 'Purchase request not found.' });
     return;
   }
 
-  const nextPendingStep = pr.approvalChain.find((s) => s.status === 'pending');
-  if (!nextPendingStep) {
-    res.status(400).json({ success: false, message: 'All approval steps are already finalized.' });
-    return;
+  const nextStep = pr.approvalChain.find((step) => step.status === 'pending');
+  if (nextStep) {
+    nextStep.status = 'approved';
+    nextStep.approverName = user?.name || 'Authorized Approver';
+    nextStep.updatedAt = new Date().toISOString().replace('T', ' ').substring(0, 16);
+    nextStep.comments = comments || 'Approved in compliance with procurement thresholds.';
   }
 
-  nextPendingStep.status = 'approved';
-  nextPendingStep.approverName = req.user?.name;
-  nextPendingStep.updatedAt = new Date().toISOString().replace('T', ' ').substring(0, 16);
-  nextPendingStep.comments = comments || 'Approved according to corporate policy guidelines.';
-
   const allApproved = pr.approvalChain.every((s) => s.status === 'approved');
-  pr.status = allApproved ? 'approved' : 'pending_procurement_review';
+  if (allApproved) {
+    pr.status = 'approved';
+  } else {
+    pr.status = 'pending_procurement_review';
+  }
 
   db.addAudit({
-    action: 'PR_STEP_APPROVED',
+    action: 'PR_APPROVED',
     entityType: 'PR',
     entityCode: pr.code,
-    user: req.user?.name || 'Approver',
-    role: (req.user?.role || 'admin').toUpperCase(),
-    details: `Step '${nextPendingStep.stepName}' approved. Status is now ${pr.status}.`,
+    user: user?.name || 'Elena Rostova',
+    role: (user?.role || 'procurement_manager').toUpperCase(),
+    details: `Approved step "${nextStep?.stepName || 'Approval Step'}". Status: ${pr.status}`,
   });
 
   res.json({
     success: true,
-    message: `Approval step recorded. Next state: ${pr.status}.`,
+    message: `Requisition ${pr.code} approval progressed successfully.`,
     data: pr,
   });
 };
 
 export const rejectRequest = (req: AuthenticatedRequest, res: Response): void => {
   const { id } = req.params;
-  const { reason } = req.body;
+  const { comments } = req.body;
+  const user = req.user;
 
-  const pr = db.purchaseRequests.find((p) => p.id === id);
+  if (user?.role !== 'procurement_manager' && user?.role !== 'admin') {
+    res.status(403).json({ success: false, message: 'Forbidden: Insufficient privileges to reject requisitions.' });
+    return;
+  }
+
+  const pr = db.purchaseRequests.find((p) => p.id === id || p.code === id);
   if (!pr) {
     res.status(404).json({ success: false, message: 'Purchase request not found.' });
     return;
   }
 
   pr.status = 'rejected';
+  pr.approvalChain.forEach((s) => {
+    if (s.status === 'pending') {
+      s.status = 'rejected';
+      s.approverName = user?.name || 'Procurement Officer';
+      s.updatedAt = new Date().toISOString().replace('T', ' ').substring(0, 16);
+      s.comments = comments || 'Requisition rejected.';
+    }
+  });
 
   db.addAudit({
     action: 'PR_REJECTED',
     entityType: 'PR',
     entityCode: pr.code,
-    user: req.user?.name || 'Reviewer',
-    role: (req.user?.role || 'admin').toUpperCase(),
-    details: `Requisition rejected. Justification: ${reason || 'Criteria not met.'}`,
+    user: user?.name || 'Elena Rostova',
+    role: (user?.role || 'procurement_manager').toUpperCase(),
+    details: `Requisition declined. Reason: ${comments || 'Procurement review rejection.'}`,
   });
 
   res.json({
     success: true,
-    message: 'Requisition marked as rejected.',
+    message: `Requisition ${pr.code} was rejected.`,
     data: pr,
   });
 };
-

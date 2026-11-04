@@ -14,8 +14,26 @@ import {
 } from 'lucide-react';
 
 export const AuditLogsView: React.FC = () => {
-  const { auditLogs, searchQuery } = useProcurement();
+  const { auditLogs, searchQuery, role, setActiveView } = useProcurement();
   const [entityFilter, setEntityFilter] = useState<string>('all');
+
+  if (role === 'vendor' || role === 'requester') {
+    return (
+      <div className="p-8 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl space-y-3">
+        <Lock className="w-10 h-10 text-rose-500 mx-auto" />
+        <h3 className="text-base font-bold text-slate-900 dark:text-white">Enterprise Compliance Audit Log Restricted</h3>
+        <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+          System audit trails and enterprise accountability logs are strictly confidential and restricted to Procurement Managers and System Administrators.
+        </p>
+        <button
+          onClick={() => setActiveView('dashboard')}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-semibold cursor-pointer"
+        >
+          Return to Dashboard
+        </button>
+      </div>
+    );
+  }
 
   const totalLogs = auditLogs.length;
   const approvalsCount = auditLogs.filter(

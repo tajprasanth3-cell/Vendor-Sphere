@@ -27,6 +27,8 @@ export const Sidebar: React.FC = () => {
     setActiveView, 
     purchaseRequests, 
     rfqs, 
+    purchaseOrders,
+    deliveries,
     role, 
     isMobileSidebarOpen, 
     setIsMobileSidebarOpen 
@@ -37,38 +39,42 @@ export const Sidebar: React.FC = () => {
   ).length;
 
   const activeRFQCount = rfqs.filter((r) => r.status === 'open' || r.status === 'evaluating').length;
+  const pendingDeliveriesCount = deliveries.filter((d) => !d.qcPassed).length;
 
-  const navItems: NavItem[] = [
+  // Role-specific customized navigation
+  const allNavItems: NavItem[] = [
     {
       id: 'dashboard',
-      label: 'Procurement Overview',
+      label: role === 'vendor' ? 'Vendor Portal' : role === 'requester' ? 'Requester Workspace' : 'Procurement Overview',
       icon: <LayoutDashboard className="w-4 h-4 shrink-0" />,
       category: 'ops',
     },
     {
       id: 'requests',
-      label: 'Purchase Requests',
+      label: role === 'requester' ? 'My Requisitions' : 'Purchase Requests',
       icon: <FileText className="w-4 h-4 shrink-0" />,
       badge: pendingPRCount,
       category: 'ops',
     },
     {
       id: 'quotations',
-      label: 'RFQ & Quotes Matrix',
+      label: role === 'vendor' ? 'Open Tenders (RFQs)' : 'RFQ & Quotes Matrix',
       icon: <Layers className="w-4 h-4 shrink-0" />,
       badge: activeRFQCount,
       category: 'ops',
     },
     {
       id: 'orders',
-      label: 'Purchase Orders (PO)',
+      label: role === 'vendor' ? 'My Purchase Orders' : 'Purchase Orders (PO)',
       icon: <ShoppingBag className="w-4 h-4 shrink-0" />,
+      badge: role === 'vendor' ? purchaseOrders.length : undefined,
       category: 'ops',
     },
     {
       id: 'deliveries',
-      label: 'Delivery & 3-Way Match',
+      label: role === 'vendor' ? 'Shipments & Tracking' : role === 'requester' ? 'Receiving & Inspection' : 'Delivery & 3-Way Match',
       icon: <Truck className="w-4 h-4 shrink-0" />,
+      badge: pendingDeliveriesCount > 0 ? pendingDeliveriesCount : undefined,
       category: 'ops',
     },
     {
@@ -79,11 +85,25 @@ export const Sidebar: React.FC = () => {
     },
     {
       id: 'audits',
-      label: 'Audit & Accountability',
+      label: role === 'admin' ? 'Audit & Governance' : 'Audit & Accountability',
       icon: <Activity className="w-4 h-4 shrink-0" />,
       category: 'governance',
     },
   ];
+
+  // RBAC Navigation Filtering
+  const navItems = allNavItems.filter((item) => {
+    if (role === 'vendor') {
+      // Vendor only accesses Portal, RFQ Tenders, their POs, and their Shipments
+      return ['dashboard', 'quotations', 'orders', 'deliveries'].includes(item.id);
+    }
+    if (role === 'requester') {
+      // Requester only accesses Requester Workspace, their PRs, and Receiving Deliveries
+      return ['dashboard', 'requests', 'deliveries'].includes(item.id);
+    }
+    // Procurement Manager and Admin access all views
+    return true;
+  });
 
   const currentRoleObj = APP_CONFIG.roles.find((r) => r.id === role);
 
@@ -94,45 +114,47 @@ export const Sidebar: React.FC = () => {
     }
   };
 
+  const opsItems = navItems.filter((item) => item.category === 'ops');
+  const vendorItems = navItems.filter((item) => item.category === 'vendors');
+  const governanceItems = navItems.filter((item) => item.category === 'governance');
+
   const sidebarContent = (
     <div className="h-full flex flex-col justify-between bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100">
       {/* Brand Header */}
       <div className="h-16 flex items-center justify-between px-5 sm:px-6 border-b border-slate-200 dark:border-slate-800 shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20 ring-1 ring-blue-400/40">
-            <Boxes className="w-5 h-5 text-white" />
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-xs">
+            <Boxes className="w-4 h-4" />
           </div>
           <div>
-            <h1 className="text-base font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-1.5">
-              VendorSphere
-              <span className="text-[10px] font-semibold bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 px-1.5 py-0.2 rounded">
-                v2.4
-              </span>
-            </h1>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Enterprise Procurement</p>
+            <span className="font-bold text-sm tracking-tight text-slate-900 dark:text-white block leading-none">
+              Vendor<span className="text-blue-600">Sphere</span>
+            </span>
+            <span className="text-[10px] text-slate-400 font-mono tracking-wider uppercase">
+              {role === 'vendor' ? 'Vendor Portal' : role === 'requester' ? 'Requester App' : 'Enterprise SCM'}
+            </span>
           </div>
         </div>
-
-        {/* Close button on mobile/tablet */}
+        {/* Mobile close button */}
         <button
           onClick={() => setIsMobileSidebarOpen(false)}
-          className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 lg:hidden cursor-pointer"
+          aria-label="Close sidebar"
         >
           <X className="w-5 h-5" />
         </button>
       </div>
 
-      {/* Nav List */}
-      <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-4 space-y-6">
-        {/* Category: Procurement Operations */}
-        <div>
-          <div className="px-3 mb-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-            Procurement Operations
-          </div>
-          <div className="space-y-1">
-            {navItems
-              .filter((item) => item.category === 'ops')
-              .map((item) => {
+      {/* Navigation Sections */}
+      <div className="flex-1 overflow-y-auto px-3.5 py-4 space-y-6">
+        {/* Category: Core Operations */}
+        {opsItems.length > 0 && (
+          <div>
+            <div className="px-3 mb-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              {role === 'vendor' ? 'Fulfillment & Bidding' : role === 'requester' ? 'My Department Ops' : 'Procurement Lifecycle'}
+            </div>
+            <div className="space-y-1">
+              {opsItems.map((item) => {
                 const isActive = activeView === item.id;
                 return (
                   <button
@@ -162,18 +184,18 @@ export const Sidebar: React.FC = () => {
                   </button>
                 );
               })}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Category: Supplier Management */}
-        <div>
-          <div className="px-3 mb-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-            Supplier Relations
-          </div>
-          <div className="space-y-1">
-            {navItems
-              .filter((item) => item.category === 'vendors')
-              .map((item) => {
+        {vendorItems.length > 0 && (
+          <div>
+            <div className="px-3 mb-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              Supplier Relations
+            </div>
+            <div className="space-y-1">
+              {vendorItems.map((item) => {
                 const isActive = activeView === item.id;
                 return (
                   <button
@@ -192,18 +214,18 @@ export const Sidebar: React.FC = () => {
                   </button>
                 );
               })}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Category: Governance & Audit */}
-        <div>
-          <div className="px-3 mb-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-            Governance & Compliance
-          </div>
-          <div className="space-y-1">
-            {navItems
-              .filter((item) => item.category === 'governance')
-              .map((item) => {
+        {governanceItems.length > 0 && (
+          <div>
+            <div className="px-3 mb-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              Governance & Compliance
+            </div>
+            <div className="space-y-1">
+              {governanceItems.map((item) => {
                 const isActive = activeView === item.id;
                 return (
                   <button
@@ -222,18 +244,19 @@ export const Sidebar: React.FC = () => {
                   </button>
                 );
               })}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Role Indicator Footer */}
       <div className="p-3 sm:p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40">
         <div className="bg-white dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 rounded-xl p-3 shadow-xs">
           <div className="flex items-center justify-between text-xs mb-1.5">
-            <span className="text-slate-500 dark:text-slate-400 font-medium text-[11px]">Session Role</span>
+            <span className="text-slate-500 dark:text-slate-400 font-medium text-[11px]">Active Session</span>
             <span className="flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Active
+              Verified
             </span>
           </div>
           <div className="font-semibold text-xs text-slate-900 dark:text-white truncate">
@@ -250,21 +273,18 @@ export const Sidebar: React.FC = () => {
   return (
     <>
       {/* Desktop Persistent Sidebar */}
-      <aside className="hidden lg:block w-64 h-full shrink-0 select-none">
+      <aside className="w-64 h-full shrink-0 hidden lg:block select-none z-20">
         {sidebarContent}
       </aside>
 
-      {/* Mobile & Tablet Slide-over Drawer */}
+      {/* Mobile Backdrop & Slide-over Drawer */}
       {isMobileSidebarOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 flex">
-          {/* Backdrop */}
+        <div className="fixed inset-0 z-50 lg:hidden flex">
           <div
-            className="fixed inset-0 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
             onClick={() => setIsMobileSidebarOpen(false)}
           />
-
-          {/* Sliding Panel */}
-          <div className="relative w-72 max-w-[85vw] h-full shadow-2xl z-10 animate-in slide-in-from-left duration-200">
+          <div className="relative w-72 max-w-[80vw] h-full shadow-2xl z-10 animate-in slide-in-from-left duration-200">
             {sidebarContent}
           </div>
         </div>

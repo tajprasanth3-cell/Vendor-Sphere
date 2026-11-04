@@ -22,9 +22,27 @@ import {
 import { Vendor } from '../../types';
 
 export const VendorsView: React.FC = () => {
-  const { vendors, searchQuery, setActiveView } = useProcurement();
+  const { vendors, searchQuery, role, setActiveView } = useProcurement();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
+
+  if (role === 'vendor') {
+    return (
+      <div className="p-8 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl space-y-3">
+        <AlertCircle className="w-10 h-10 text-amber-500 mx-auto" />
+        <h3 className="text-base font-bold text-slate-900 dark:text-white">Competitor Supplier Directory Restricted</h3>
+        <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+          The enterprise supplier database contains confidential vendor master records. As a vendor partner, you can review your performance scorecard directly from the Vendor Portal dashboard.
+        </p>
+        <button
+          onClick={() => setActiveView('dashboard')}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-semibold cursor-pointer"
+        >
+          Return to Vendor Portal
+        </button>
+      </div>
+    );
+  }
 
   const categories = ['all', ...Array.from(new Set(vendors.map((v) => v.category)))];
 
