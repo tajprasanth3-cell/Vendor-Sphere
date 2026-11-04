@@ -23,3 +23,4 @@ const VendorSchema = new Schema<IVendor>({
 }, { timestamps: true });
 
 export const VendorModel = mongoose.model<IVendor>('Vendor', VendorSchema);
+

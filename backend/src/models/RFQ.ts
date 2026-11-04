@@ -36,3 +36,4 @@ const RFQSchema = new Schema<IRFQ>({
 }, { timestamps: true });
 
 export const RFQModel = mongoose.model<IRFQ>('RFQ', RFQSchema);
+

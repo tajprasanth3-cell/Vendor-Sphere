@@ -48,3 +48,4 @@ const PurchaseRequestSchema = new Schema<IPurchaseRequest>({
 }, { timestamps: true });
 
 export const PurchaseRequestModel = mongoose.model<IPurchaseRequest>('PurchaseRequest', PurchaseRequestSchema);
+

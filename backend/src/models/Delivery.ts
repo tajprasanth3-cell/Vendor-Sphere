@@ -26,3 +26,4 @@ const DeliverySchema = new Schema<IDeliveryShipment>({
 }, { timestamps: true });
 
 export const DeliveryModel = mongoose.model<IDeliveryShipment>('Delivery', DeliverySchema);
+

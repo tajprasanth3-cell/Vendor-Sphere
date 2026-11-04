@@ -42,7 +42,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateModal }) => {
     markNotificationAsRead,
     markAllNotificationsAsRead,
     clearNotifications,
-    setActiveView
+    setActiveView,
+    isBackendConnected,
+    dbProviderInfo
   } = useProcurement();
 
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -172,6 +174,17 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateModal }) => {
             <Moon className="w-4 h-4 text-slate-700" />
           )}
         </button>
+
+        {/* Backend & MongoDB Atlas Connection Status */}
+        <div 
+          className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border bg-slate-100/80 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800 shrink-0"
+          title={isBackendConnected ? `Backend API Online | Database: ${dbProviderInfo?.provider || 'MongoDB Atlas'}` : 'Operating in local cache mode'}
+        >
+          <span className={`w-2 h-2 rounded-full ${isBackendConnected ? 'bg-emerald-500 shadow-sm shadow-emerald-500/50' : 'bg-amber-400'}`} />
+          <span className="text-slate-700 dark:text-slate-300 font-medium">
+            {isBackendConnected ? (dbProviderInfo?.provider || 'MongoDB') : 'Local Cache'}
+          </span>
+        </div>
 
         {/* Role Selector */}
         <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-lg px-2 sm:px-2.5 py-1.5 shrink-0">
