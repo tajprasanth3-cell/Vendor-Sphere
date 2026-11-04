@@ -1,14 +1,24 @@
 # VendorSphere — Enterprise Vendor & Procurement Management Platform
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-frontend--two--ruddy--47.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://frontend-two-ruddy-47.vercel.app)
+[![Vercel Status](https://img.shields.io/badge/Vercel-Ready%20%26%20Online-success?style=for-the-badge&logo=vercel)](https://frontend-two-ruddy-47.vercel.app)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/tajprasanth3-cell/Vendor-Sphere)
+
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19.0-61dafb.svg)](https://react.dev/)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4.0-38bdf8.svg)](https://tailwindcss.com/)
 [![Express](https://img.shields.io/badge/Express-4.21-green.svg)](https://expressjs.com/)
+[![MongoDB Atlas](https://img.shields.io/badge/MongoDB-Atlas%20Cloud-green.svg?logo=mongodb)](https://cloud.mongodb.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 > A modern, centralized platform that helps organizations manage vendor relationships, purchasing requests, quotation evaluation, approval processes, purchase orders, deliveries, and procurement activities with institutional visibility, accountability, and control.
 > 
 > *Built for the **ADZ4NEEDZ** Enterprise Software Development Challenge.*
+
+### 🌐 Live Cloud Deployment
+- **Frontend Live URL (Vercel)**: **[https://frontend-two-ruddy-47.vercel.app](https://frontend-two-ruddy-47.vercel.app)**
+- **GitHub Repository**: **[https://github.com/tajprasanth3-cell/Vendor-Sphere](https://github.com/tajprasanth3-cell/Vendor-Sphere)**
+- **Backend Infrastructure (Render)**: Ready for 1-click deploy via [`render.yaml`](./render.yaml)
 
 ---
 
