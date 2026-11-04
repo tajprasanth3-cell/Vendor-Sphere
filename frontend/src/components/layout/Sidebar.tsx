@@ -72,7 +72,7 @@ export const Sidebar: React.FC = () => {
     },
     {
       id: 'deliveries',
-      label: role === 'vendor' ? 'Shipments & Tracking' : role === 'requester' ? 'Receiving & Inspection' : 'Delivery & 3-Way Match',
+      label: role === 'vendor' ? 'Shipments & Tracking' : role === 'requester' ? 'Receiving & Inspection' : 'Delivery & 2-Way Match',
       icon: <Truck className="w-4 h-4 shrink-0" />,
       badge: pendingDeliveriesCount > 0 ? pendingDeliveriesCount : undefined,
       category: 'ops',
@@ -160,19 +160,19 @@ export const Sidebar: React.FC = () => {
                   <button
                     key={item.id}
                     onClick={() => handleNavClick(item.id)}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-colors cursor-pointer ${
+                    className={`w-full flex items-center justify-between px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-colors cursor-pointer min-h-[38px] group ${
                       isActive
                         ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30 font-semibold'
                         : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/60'
                     }`}
                   >
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
                       {item.icon}
-                      <span>{item.label}</span>
+                      <span className="truncate text-left leading-snug">{item.label}</span>
                     </div>
                     {item.badge !== undefined && item.badge > 0 && (
                       <span
-                        className={`text-[10px] sm:text-[11px] font-bold px-1.5 py-0.5 rounded-full ${
+                        className={`text-[10px] sm:text-[11px] font-bold px-1.5 py-0.5 rounded-full ml-1.5 shrink-0 ${
                           isActive
                             ? 'bg-white text-blue-600'
                             : 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20'
@@ -201,15 +201,15 @@ export const Sidebar: React.FC = () => {
                   <button
                     key={item.id}
                     onClick={() => handleNavClick(item.id)}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-colors cursor-pointer ${
+                    className={`w-full flex items-center justify-between px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-colors cursor-pointer min-h-[38px] group ${
                       isActive
                         ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30 font-semibold'
                         : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/60'
                     }`}
                   >
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
                       {item.icon}
-                      <span>{item.label}</span>
+                      <span className="truncate text-left leading-snug">{item.label}</span>
                     </div>
                   </button>
                 );
@@ -231,15 +231,15 @@ export const Sidebar: React.FC = () => {
                   <button
                     key={item.id}
                     onClick={() => handleNavClick(item.id)}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-colors cursor-pointer ${
+                    className={`w-full flex items-center justify-between px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-colors cursor-pointer min-h-[38px] group ${
                       isActive
                         ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30 font-semibold'
                         : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/60'
                     }`}
                   >
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
                       {item.icon}
-                      <span>{item.label}</span>
+                      <span className="truncate text-left leading-snug">{item.label}</span>
                     </div>
                   </button>
                 );
