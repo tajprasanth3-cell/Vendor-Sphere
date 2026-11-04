@@ -16,6 +16,9 @@
 > *Built for the **ADZ4NEEDZ** Enterprise Software Development Challenge.*
 
 ### 🌐 Live Cloud Deployment
+> ### 🔗 **Official Live Hosted Application**
+> 👉 **[Click here to open VendorSphere on Vercel: https://frontend-two-ruddy-47.vercel.app](https://frontend-two-ruddy-47.vercel.app)**
+
 - **Frontend Live URL (Vercel)**: **[https://frontend-two-ruddy-47.vercel.app](https://frontend-two-ruddy-47.vercel.app)**
 - **GitHub Repository**: **[https://github.com/tajprasanth3-cell/Vendor-Sphere](https://github.com/tajprasanth3-cell/Vendor-Sphere)**
 - **Backend Infrastructure (Render)**: Ready for 1-click deploy via [`render.yaml`](./render.yaml)
