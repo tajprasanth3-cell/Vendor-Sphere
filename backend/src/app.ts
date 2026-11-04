@@ -1,6 +1,7 @@
 import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import { ENV } from './config/env.js';
+import { getDBStatus } from './config/db.js';
 import apiRouter from './routes/index.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
@@ -15,12 +16,17 @@ export const createApp = (): Application => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
-  // Health check endpoint
+  // Health check endpoint with MongoDB status
   app.get('/api/health', (_req: Request, res: Response) => {
+    const dbStatus = getDBStatus();
     res.json({
       status: 'operational',
       platform: 'VendorSphere Enterprise API',
       version: '2.4.0',
+      database: {
+        provider: 'MongoDB Atlas',
+        ...dbStatus,
+      },
       timestamp: new Date().toISOString(),
     });
   });
@@ -41,4 +47,3 @@ export const createApp = (): Application => {
 
   return app;
 };
-
