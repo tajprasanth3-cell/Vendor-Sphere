@@ -1,9 +1,9 @@
 # VendorSphere — Enterprise Vendor & Procurement Management Platform
 
-[![Live Demo](https://img.shields.io/badge/Live%20Hosted%20App-frontend--two--ruddy--47.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://frontend-two-ruddy-47.vercel.app)
-[![Vercel Production](https://img.shields.io/badge/Vercel-Production%20Live-success?style=for-the-badge&logo=vercel)](https://frontend-two-ruddy-47.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live%20Hosted%20App-vendor--sphere--app.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vendor-sphere-app.vercel.app)
+[![Vercel Production](https://img.shields.io/badge/Vercel-Production%20Live-success?style=for-the-badge&logo=vercel)](https://vendor-sphere-app.vercel.app)
 
-> **Live Production Website**: **[https://frontend-two-ruddy-47.vercel.app](https://frontend-two-ruddy-47.vercel.app)**
+> **Live Production Website**: **[https://vendor-sphere-app.vercel.app](https://vendor-sphere-app.vercel.app)**
 > 
 > Built to fulfill the enterprise software development challenge by **ADZ4NEEDZ**.
 
@@ -12,7 +12,7 @@ VendorSphere is a modern, enterprise-grade Vendor & Procurement Management platf
 ---
 
 ## 🌐 Live Hosted Link
-- **Vercel Production**: **[https://frontend-two-ruddy-47.vercel.app](https://frontend-two-ruddy-47.vercel.app)**
+- **Vercel Production**: **[https://vendor-sphere-app.vercel.app](https://vendor-sphere-app.vercel.app)**
 - **GitHub Repository**: **[https://github.com/tajprasanth3-cell/Vendor-Sphere](https://github.com/tajprasanth3-cell/Vendor-Sphere)**
 
 ---

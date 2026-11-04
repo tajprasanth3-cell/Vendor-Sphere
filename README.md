@@ -1,7 +1,7 @@
 # VendorSphere — Enterprise Vendor & Procurement Management Platform
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-frontend--two--ruddy--47.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://frontend-two-ruddy-47.vercel.app)
-[![Vercel Status](https://img.shields.io/badge/Vercel-Ready%20%26%20Online-success?style=for-the-badge&logo=vercel)](https://frontend-two-ruddy-47.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-vendor--sphere--app.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vendor-sphere-app.vercel.app)
+[![Vercel Status](https://img.shields.io/badge/Vercel-Ready%20%26%20Online-success?style=for-the-badge&logo=vercel)](https://vendor-sphere-app.vercel.app)
 [![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/tajprasanth3-cell/Vendor-Sphere)
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-blue.svg)](https://www.typescriptlang.org/)
@@ -17,9 +17,9 @@
 
 ### 🌐 Live Cloud Deployment
 > ### 🔗 **Official Live Hosted Application**
-> 👉 **[Click here to open VendorSphere on Vercel: https://frontend-two-ruddy-47.vercel.app](https://frontend-two-ruddy-47.vercel.app)**
+> 👉 **[Click here to open VendorSphere on Vercel: https://vendor-sphere-app.vercel.app](https://vendor-sphere-app.vercel.app)**
 
-- **Frontend Live URL (Vercel)**: **[https://frontend-two-ruddy-47.vercel.app](https://frontend-two-ruddy-47.vercel.app)**
+- **Frontend Live URL (Vercel)**: **[https://vendor-sphere-app.vercel.app](https://vendor-sphere-app.vercel.app)**
 - **GitHub Repository**: **[https://github.com/tajprasanth3-cell/Vendor-Sphere](https://github.com/tajprasanth3-cell/Vendor-Sphere)**
 - **Backend Infrastructure (Render)**: Ready for 1-click deploy via [`render.yaml`](./render.yaml)
 
