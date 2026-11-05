@@ -107,11 +107,30 @@ export const Sidebar: React.FC = () => {
 
   const currentRoleObj = APP_CONFIG.roles.find((r) => r.id === role);
 
+  const handleBrandClick = () => {
+    setActiveView('dashboard');
+    if (isMobileSidebarOpen) {
+      setIsMobileSidebarOpen(false);
+    }
+    const mainEl = document.querySelector('main');
+    if (mainEl) {
+      mainEl.scrollTop = 0;
+      mainEl.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  };
+
   const handleNavClick = (viewId: string) => {
     setActiveView(viewId);
     if (isMobileSidebarOpen) {
       setIsMobileSidebarOpen(false);
     }
+    const mainEl = document.querySelector('main');
+    if (mainEl) {
+      mainEl.scrollTop = 0;
+      mainEl.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   };
 
   const opsItems = navItems.filter((item) => item.category === 'ops');
@@ -121,24 +140,29 @@ export const Sidebar: React.FC = () => {
   const sidebarContent = (
     <div className="h-full flex flex-col justify-between bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100">
       {/* Brand Header */}
-      <div className="h-16 flex items-center justify-between px-5 sm:px-6 border-b border-slate-200 dark:border-slate-800 shrink-0">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-xs">
-            <Boxes className="w-4 h-4" />
+      <div className="h-16 flex items-center justify-between px-3 sm:px-3.5 border-b border-slate-200 dark:border-slate-800 shrink-0">
+        <button
+          onClick={handleBrandClick}
+          className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all cursor-pointer group text-left select-none focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+          title="Return to Main Dashboard"
+          aria-label="Return to Main Dashboard"
+        >
+          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-xs group-hover:scale-105 group-hover:bg-blue-700 transition-all shrink-0">
+            <Boxes className="w-4 h-4 transition-transform group-hover:rotate-6" />
           </div>
           <div>
-            <span className="font-bold text-sm tracking-tight text-slate-900 dark:text-white block leading-none">
+            <span className="font-bold text-sm tracking-tight text-slate-900 dark:text-white block leading-none group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
               Vendor<span className="text-blue-600">Sphere</span>
             </span>
-            <span className="text-[10px] text-slate-400 font-mono tracking-wider uppercase">
+            <span className="text-[10px] text-slate-400 font-mono tracking-wider uppercase block mt-1">
               {role === 'vendor' ? 'Vendor Portal' : role === 'requester' ? 'Requester App' : 'Enterprise SCM'}
             </span>
           </div>
-        </div>
+        </button>
         {/* Mobile close button */}
         <button
           onClick={() => setIsMobileSidebarOpen(false)}
-          className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 lg:hidden cursor-pointer"
+          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 lg:hidden cursor-pointer"
           aria-label="Close sidebar"
         >
           <X className="w-5 h-5" />

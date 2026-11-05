@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ProcurementProvider, useProcurement } from './context/ProcurementContext';
 import { Sidebar } from './components/layout/Sidebar';
 import { Navbar } from './components/layout/Navbar';
@@ -15,6 +15,16 @@ import { CreatePRModal } from './components/modals/CreatePRModal';
 const MainAppContent: React.FC = () => {
   const { isAuthenticated, activeView } = useProcurement();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const mainScrollRef = useRef<HTMLElement>(null);
+
+  // Automatically scroll view to top whenever active view changes
+  useEffect(() => {
+    if (mainScrollRef.current) {
+      mainScrollRef.current.scrollTop = 0;
+      mainScrollRef.current.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [activeView]);
 
   if (!isAuthenticated) {
     return <LoginView />;
@@ -52,7 +62,7 @@ const MainAppContent: React.FC = () => {
         <Navbar onOpenCreateModal={() => setIsCreateModalOpen(true)} />
 
         {/* Scrollable View Canvas with Adaptive Padding */}
-        <main className="flex-1 overflow-y-auto p-3.5 sm:p-5 md:p-8 bg-slate-50/70 dark:bg-slate-950/90 transition-colors">
+        <main ref={mainScrollRef} className="flex-1 overflow-y-auto p-3.5 sm:p-5 md:p-8 bg-slate-50/70 dark:bg-slate-950/90 transition-colors">
           <div className="max-w-7xl mx-auto pb-16">
             {renderActiveView()}
           </div>
