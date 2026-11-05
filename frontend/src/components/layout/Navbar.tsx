@@ -113,7 +113,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateModal }) => {
             <Boxes className="w-4 h-4" />
           </div>
           <span className="font-bold text-sm tracking-tight text-slate-900 dark:text-white leading-none">
-            Vendor<span className="text-blue-600">Sphere</span>
+            Vendor <span className="text-blue-600">Sphere</span>
           </span>
         </button>
 

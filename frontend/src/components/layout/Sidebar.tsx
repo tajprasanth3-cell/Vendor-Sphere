@@ -140,10 +140,10 @@ export const Sidebar: React.FC = () => {
   const sidebarContent = (
     <div className="h-full flex flex-col justify-between bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100">
       {/* Brand Header */}
-      <div className="h-16 flex items-center justify-between px-3 sm:px-3.5 border-b border-slate-200 dark:border-slate-800 shrink-0">
+      <div className="h-16 flex items-center justify-between px-3.5 sm:px-4 border-b border-slate-200 dark:border-slate-800 shrink-0">
         <button
           onClick={handleBrandClick}
-          className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all cursor-pointer group text-left select-none focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+          className="flex items-center gap-2.5 px-2 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-all cursor-pointer group text-left select-none focus:outline-none focus:ring-2 focus:ring-blue-500/30"
           title="Return to Main Dashboard"
           aria-label="Return to Main Dashboard"
         >
@@ -152,7 +152,7 @@ export const Sidebar: React.FC = () => {
           </div>
           <div>
             <span className="font-bold text-sm tracking-tight text-slate-900 dark:text-white block leading-none group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-              Vendor<span className="text-blue-600">Sphere</span>
+              Vendor <span className="text-blue-600">Sphere</span>
             </span>
             <span className="text-[10px] text-slate-400 font-mono tracking-wider uppercase block mt-1">
               {role === 'vendor' ? 'Vendor Portal' : role === 'requester' ? 'Requester App' : 'Enterprise SCM'}
