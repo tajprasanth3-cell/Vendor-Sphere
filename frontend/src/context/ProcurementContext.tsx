@@ -204,30 +204,10 @@ const getInitialAudits = (role: UserRole): AuditLog[] => {
 };
 
 export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Auth state with local persistence
-  const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => {
-    const savedUser = localStorage.getItem('vendorsphere_user');
-    if (savedUser) {
-      try {
-        return JSON.parse(savedUser);
-      } catch (e) {
-        return DEMO_ACCOUNTS.procurement_manager;
-      }
-    }
-    return DEMO_ACCOUNTS.procurement_manager;
-  });
-
-  // Role correctly mirrors currentUser.role
-  const [role, setRoleState] = useState<UserRole>(() => {
-    const savedUser = localStorage.getItem('vendorsphere_user');
-    if (savedUser) {
-      try {
-        const u = JSON.parse(savedUser);
-        if (u.role) return u.role as UserRole;
-      } catch (e) {}
-    }
-    return 'procurement_manager';
-  });
+  // Always display login screen first when website opens
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  const [role, setRoleState] = useState<UserRole>('procurement_manager');
 
   const [activeView, setActiveView] = useState<string>('dashboard');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -237,10 +217,6 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [isBackendConnected, setIsBackendConnected] = useState<boolean>(false);
   const [dbProviderInfo, setDbProviderInfo] = useState<{ provider: string; connected: boolean; host?: string } | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return localStorage.getItem('vendorsphere_auth') === 'true';
-  });
 
   // Core procurement collections - initialized based on active role
   const [purchaseRequests, setPurchaseRequests] = useState<PurchaseRequest[]>(() => getInitialPRs(role));
@@ -435,6 +411,31 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
       const match = Object.values(DEMO_ACCOUNTS).find((u) => u.email.toLowerCase() === roleOrEmail.toLowerCase());
       if (match) {
         targetUser = match;
+      } else {
+        const lower = roleOrEmail.toLowerCase();
+        let detectedRole: UserRole = 'procurement_manager';
+        let detectedDept = 'Procurement & Strategic Sourcing';
+        const rawName = roleOrEmail.split('@')[0] || 'User';
+        const detectedName = rawName.replace(/[._]/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+
+        if (lower.includes('vendor') || lower.includes('supplier') || lower.includes('apex')) {
+          detectedRole = 'vendor';
+          detectedDept = 'Apex Cloud Solutions Inc.';
+        } else if (lower.includes('req') || lower.includes('jenkins') || lower.includes('dept')) {
+          detectedRole = 'requester';
+          detectedDept = 'Infrastructure & DevOps';
+        } else if (lower.includes('admin') || lower.includes('vance') || lower.includes('sec')) {
+          detectedRole = 'admin';
+          detectedDept = 'Global IT Governance';
+        }
+
+        targetUser = {
+          id: `usr-${Date.now()}`,
+          name: detectedName || 'Enterprise Specialist',
+          email: roleOrEmail,
+          role: detectedRole,
+          department: detectedDept,
+        };
       }
     }
 
