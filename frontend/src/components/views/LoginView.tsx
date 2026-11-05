@@ -254,9 +254,27 @@ export const LoginView: React.FC = () => {
 
             {/* Email Field */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                Corporate Email Address
-              </label>
+              <div className="flex items-center justify-between text-xs">
+                <label className="font-semibold text-slate-700 dark:text-slate-300">
+                  Corporate Email Address
+                </label>
+                <select
+                  aria-label="Quick Select Demo Persona"
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === 'procurement_manager') setEmail('elena.rostova@enterprise.internal');
+                    else if (val === 'requester') setEmail('sarah.jenkins@enterprise.internal');
+                    else if (val === 'admin') setEmail('alexander.vance@enterprise.internal');
+                    else if (val === 'vendor') setEmail('apex.rep@apexlogistics.com');
+                  }}
+                  className="text-[11px] font-medium text-blue-600 dark:text-blue-400 bg-transparent border-0 cursor-pointer focus:outline-none"
+                >
+                  <option value="procurement_manager">Persona: Procurement Mgr</option>
+                  <option value="requester">Persona: Dept Requester</option>
+                  <option value="admin">Persona: Administrator</option>
+                  <option value="vendor">Persona: Vendor Partner</option>
+                </select>
+              </div>
               <div className="relative">
                 <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input

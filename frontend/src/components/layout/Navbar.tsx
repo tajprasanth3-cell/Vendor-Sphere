@@ -15,10 +15,13 @@ import {
   Trash2,
   X,
   ChevronRight,
-  Boxes
+  Boxes,
+  ChevronDown,
+  UserCheck
 } from 'lucide-react';
 import { useProcurement } from '../../context/ProcurementContext';
 import { Button } from '../common/Button';
+import { UserRole } from '../../types';
 
 interface NavbarProps {
   onOpenCreateModal: () => void;
@@ -27,6 +30,7 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateModal }) => {
   const { 
     role, 
+    setRole,
     theme, 
     toggleTheme, 
     searchQuery, 
@@ -44,22 +48,27 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateModal }) => {
 
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
 
-  // Close notifications dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
         setIsNotificationsOpen(false);
       }
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setIsProfileOpen(false);
+      }
     };
-    if (isNotificationsOpen) {
+    if (isNotificationsOpen || isProfileOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isNotificationsOpen]);
+  }, [isNotificationsOpen, isProfileOpen]);
 
   const handleNotificationClick = (notifId: string, targetView?: string) => {
     markNotificationAsRead(notifId);
@@ -313,30 +322,96 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateModal }) => {
           )}
         </div>
 
-        {/* User Profile Info */}
-        <div className="flex items-center gap-2 pl-1 sm:pl-2 border-l border-slate-200 dark:border-slate-800 shrink-0">
-          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-100 dark:bg-blue-600/20 border border-blue-200 dark:border-blue-500/30 flex items-center justify-center font-bold text-[11px] sm:text-xs text-blue-700 dark:text-blue-400 shrink-0">
-            {role === 'requester' ? 'SJ' : role === 'admin' ? 'AD' : role === 'vendor' ? 'VN' : 'ER'}
-          </div>
-          <div className="hidden xl:block text-left">
-            <div className="text-xs font-semibold text-slate-900 dark:text-white leading-tight">
-              {currentUser?.name || 'Elena Rostova'}
+        {/* Interactive User Profile & Persona Switcher */}
+        <div className="relative shrink-0" ref={profileRef}>
+          <button
+            onClick={() => setIsProfileOpen(!isProfileOpen)}
+            className="flex items-center gap-2 pl-1 sm:pl-2 border-l border-slate-200 dark:border-slate-800 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors cursor-pointer select-none text-left"
+            title="Switch User Persona or Account"
+            aria-label="User profile and role menu"
+          >
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-100 dark:bg-blue-600/20 border border-blue-200 dark:border-blue-500/30 flex items-center justify-center font-bold text-[11px] sm:text-xs text-blue-700 dark:text-blue-400 shrink-0">
+              {role === 'requester' ? 'SJ' : role === 'admin' ? 'AD' : role === 'vendor' ? 'VN' : 'ER'}
             </div>
-            <div className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">
-              {currentUser?.department || 'Procurement Specialist'}
+            <div className="hidden xl:block text-left">
+              <div className="text-xs font-semibold text-slate-900 dark:text-white leading-tight">
+                {currentUser?.name || 'Elena Rostova'}
+              </div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">
+                {currentUser?.department || 'Procurement Specialist'}
+              </div>
             </div>
-          </div>
-        </div>
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0 hidden sm:block" />
+          </button>
 
-        {/* Logout Button */}
-        <button
-          onClick={logout}
-          className="p-2 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer shrink-0"
-          title="Sign Out / Switch Session"
-          aria-label="Sign out"
-        >
-          <LogOut className="w-4 h-4" />
-        </button>
+          {/* Profile & Role Switcher Menu */}
+          {isProfileOpen && (
+            <div className="absolute right-0 top-12 w-64 sm:w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in duration-150">
+              {/* User Bio */}
+              <div className="p-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/80">
+                <div className="font-bold text-xs text-slate-900 dark:text-white truncate">
+                  {currentUser?.name}
+                </div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                  {currentUser?.email}
+                </div>
+                <div className="text-[10px] text-blue-600 dark:text-blue-400 font-medium mt-0.5">
+                  {currentUser?.department}
+                </div>
+              </div>
+
+              {/* Persona Switcher List */}
+              <div className="p-2 space-y-1">
+                <div className="px-2 py-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                  Switch Active Persona
+                </div>
+
+                {[
+                  { id: 'procurement_manager' as UserRole, name: 'Elena Rostova', roleLabel: 'Procurement Manager', desc: 'Full Enterprise Access' },
+                  { id: 'requester' as UserRole, name: 'Sarah Jenkins', roleLabel: 'Dept Requester', desc: 'Requisitions & QC' },
+                  { id: 'vendor' as UserRole, name: 'Apex Cloud Rep', roleLabel: 'Vendor Partner', desc: 'Tenders & Shipments' },
+                  { id: 'admin' as UserRole, name: 'Alexander Vance', roleLabel: 'Administrator', desc: 'System & Audit Trails' },
+                ].map((p) => {
+                  const isCurrent = role === p.id;
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => {
+                        setRole(p.id);
+                        setIsProfileOpen(false);
+                      }}
+                      className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs transition-colors cursor-pointer flex items-center justify-between ${
+                        isCurrent
+                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-bold'
+                          : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="font-semibold text-xs leading-tight truncate">{p.roleLabel}</div>
+                        <div className="text-[10px] text-slate-400 truncate">{p.name} • {p.desc}</div>
+                      </div>
+                      {isCurrent && <UserCheck className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0 ml-1.5" />}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Logout button */}
+              <div className="p-2 border-t border-slate-200 dark:border-slate-800">
+                <button
+                  onClick={() => {
+                    setIsProfileOpen(false);
+                    logout();
+                  }}
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors cursor-pointer font-medium"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

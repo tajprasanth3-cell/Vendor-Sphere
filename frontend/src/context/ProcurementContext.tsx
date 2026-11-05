@@ -415,6 +415,12 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
       setDeliveries(getInitialDeliveries(newRole));
       setVendors(getInitialVendors(newRole));
       setAuditLogs(getInitialAudits(newRole));
+      // Ensure active view is permitted for this role
+      if (newRole === 'vendor' && ['requests', 'vendors', 'audits'].includes(activeView)) {
+        setActiveView('dashboard');
+      } else if (newRole === 'requester' && ['quotations', 'orders', 'vendors', 'audits'].includes(activeView)) {
+        setActiveView('dashboard');
+      }
       // Re-authenticate silently with backend
       api.login(newRole).then(() => loadBackendData()).catch(() => {});
     }

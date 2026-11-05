@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useProcurement } from '../../context/ProcurementContext';
 import { APP_CONFIG } from '../../config';
+import { UserRole } from '../../types';
 
 interface NavItem {
   id: string;
@@ -30,6 +31,7 @@ export const Sidebar: React.FC = () => {
     purchaseOrders,
     deliveries,
     role, 
+    setRole,
     isMobileSidebarOpen, 
     setIsMobileSidebarOpen 
   } = useProcurement();
@@ -273,11 +275,11 @@ export const Sidebar: React.FC = () => {
         )}
       </div>
 
-      {/* Role Indicator Footer */}
+      {/* Role Indicator Footer & Quick Persona Switcher */}
       <div className="p-3 sm:p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40">
-        <div className="bg-white dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 rounded-xl p-3 shadow-xs">
-          <div className="flex items-center justify-between text-xs mb-1.5">
-            <span className="text-slate-500 dark:text-slate-400 font-medium text-[11px]">Active Session</span>
+        <div className="bg-white dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800/80 rounded-xl p-3 shadow-xs space-y-2">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-slate-500 dark:text-slate-400 font-medium text-[11px]">Active Persona</span>
             <span className="flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               Verified
@@ -286,8 +288,25 @@ export const Sidebar: React.FC = () => {
           <div className="font-semibold text-xs text-slate-900 dark:text-white truncate">
             {currentRoleObj?.label}
           </div>
-          <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+          <div className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
             {currentRoleObj?.description}
+          </div>
+          {/* Quick Role Switcher Selector */}
+          <div className="pt-1.5 border-t border-slate-100 dark:border-slate-800">
+            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+              Switch Workspace Persona:
+            </label>
+            <select
+              aria-label="Switch active persona"
+              value={role}
+              onChange={(e) => setRole(e.target.value as UserRole)}
+              className="w-full py-1.5 px-2 text-[11px] font-semibold rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-blue-600 dark:text-blue-400 cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="procurement_manager">Procurement Manager (Full SCM)</option>
+              <option value="requester">Dept Requester (Requisitions)</option>
+              <option value="vendor">Vendor Partner (Tenders & Bids)</option>
+              <option value="admin">Administrator (Governance & Audits)</option>
+            </select>
           </div>
         </div>
       </div>
