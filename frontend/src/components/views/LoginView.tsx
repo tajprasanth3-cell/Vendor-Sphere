@@ -10,16 +10,12 @@ import {
   ArrowRight, 
   Sun, 
   Moon, 
-  Users, 
-  FileCheck, 
-  Building,
   KeyRound,
   RotateCcw,
   Sparkles,
   AlertCircle
 } from 'lucide-react';
-import { useProcurement, DEMO_ACCOUNTS } from '../../context/ProcurementContext';
-import { UserRole } from '../../types';
+import { useProcurement } from '../../context/ProcurementContext';
 import { Button } from '../common/Button';
 import { Modal } from '../common/Modal';
 
@@ -27,9 +23,8 @@ export const LoginView: React.FC = () => {
   const { login, theme, toggleTheme, forgotPassword, resetPasswordWithOtp } = useProcurement();
 
   const [email, setEmail] = useState('elena.rostova@enterprise.internal');
-  const [password, setPassword] = useState('••••••••••••');
+  const [password, setPassword] = useState('password123');
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<UserRole>('procurement_manager');
   const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,12 +39,6 @@ export const LoginView: React.FC = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotError, setForgotError] = useState<string | null>(null);
-
-  const handleSelectRole = (r: UserRole) => {
-    setSelectedRole(r);
-    setEmail(DEMO_ACCOUNTS[r].email);
-    setError(null);
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -245,106 +234,44 @@ export const LoginView: React.FC = () => {
         </div>
 
         {/* Center Card */}
-        <div className="max-w-md w-full mx-auto my-auto py-1 sm:py-3">
-          <div className="mb-3 sm:mb-4 space-y-0.5 sm:space-y-1">
+        <div className="max-w-md w-full mx-auto my-auto py-2 sm:py-6">
+          <div className="mb-5 sm:mb-6 space-y-1 sm:space-y-1.5 text-left">
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
               Sign In to Your Workspace
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Select an enterprise persona or enter your credentials:
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+              Enter your corporate credentials to access the procurement portal:
             </p>
           </div>
 
-          {/* Quick Role Demo Accounts Selector Pills */}
-          <div className="space-y-1.5 mb-3 sm:mb-4">
-            <div className="flex items-center justify-between">
-              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
-                Quick Role Demo Accounts:
-              </label>
-              <span className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold">1-Click Login</span>
-            </div>
-            <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
-              {[
-                {
-                  role: 'procurement_manager' as UserRole,
-                  title: 'Procurement Mgr',
-                  name: 'Elena Rostova',
-                  icon: <FileCheck className="w-3.5 h-3.5 text-blue-500 shrink-0" />,
-                },
-                {
-                  role: 'requester' as UserRole,
-                  title: 'Dept Requester',
-                  name: 'Sarah Jenkins',
-                  icon: <Users className="w-3.5 h-3.5 text-indigo-500 shrink-0" />,
-                },
-                {
-                  role: 'admin' as UserRole,
-                  title: 'Administrator',
-                  name: 'Alexander Vance',
-                  icon: <ShieldCheck className="w-3.5 h-3.5 text-purple-500 shrink-0" />,
-                },
-                {
-                  role: 'vendor' as UserRole,
-                  title: 'Vendor Partner',
-                  name: 'Apex Cloud Rep',
-                  icon: <Building className="w-3.5 h-3.5 text-emerald-500 shrink-0" />,
-                },
-              ].map((p) => {
-                const isSelected = selectedRole === p.role;
-                return (
-                  <button
-                    key={p.role}
-                    type="button"
-                    onClick={() => handleSelectRole(p.role)}
-                    className={`p-2 sm:p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
-                      isSelected
-                        ? 'bg-blue-50 border-blue-500 dark:bg-blue-500/10 dark:border-blue-500 shadow-xs ring-1 ring-blue-500/30'
-                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
-                    }`}
-                  >
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      {p.icon}
-                      <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                        {p.title}
-                      </span>
-                    </div>
-                    <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate pl-5 mt-0.5">
-                      {p.name}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-2.5 sm:space-y-3">
+          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             {error && (
-              <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400 text-xs font-medium">
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400 text-xs font-medium">
                 {error}
               </div>
             )}
 
             {/* Email Field */}
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
                 Corporate Email Address
               </label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@enterprise.internal"
-                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg pl-9 pr-3 py-2 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-xs"
                 />
               </div>
             </div>
 
             {/* Password Field */}
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs">
                 <label className="font-semibold text-slate-700 dark:text-slate-300">
                   Password
@@ -352,25 +279,25 @@ export const LoginView: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleOpenForgotModal}
-                  className="text-blue-600 dark:text-blue-400 hover:underline text-[11px] font-semibold cursor-pointer"
+                  className="text-blue-600 dark:text-blue-400 hover:underline text-[11px] sm:text-xs font-semibold cursor-pointer"
                 >
                   Forgot Password?
                 </button>
               </div>
               <div className="relative">
-                <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter enterprise credentials"
-                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg pl-9 pr-9 py-2 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl pl-10 pr-10 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-xs"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -386,7 +313,7 @@ export const LoginView: React.FC = () => {
                   onChange={(e) => setRememberMe(e.target.checked)}
                   className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                 />
-                <span className="text-slate-600 dark:text-slate-400 text-xs">Remember session for 30 days</span>
+                <span className="text-slate-600 dark:text-slate-400 text-xs">Remember session on this device</span>
               </label>
             </div>
 
@@ -396,19 +323,19 @@ export const LoginView: React.FC = () => {
               variant="primary"
               size="md"
               loading={isLoading}
-              className="w-full text-xs sm:text-sm font-semibold py-2.5 mt-1 min-h-[40px]"
+              className="w-full text-xs sm:text-sm font-semibold py-2.5 sm:py-3 mt-1.5 min-h-[42px] rounded-xl shadow-sm shadow-blue-600/20"
               icon={<ArrowRight className="w-4 h-4" />}
             >
               Sign In to Procurement Workspace
             </Button>
           </form>
 
-          {/* Quick Note */}
-          <div className="mt-3 pt-2.5 sm:mt-3.5 sm:pt-3 border-t border-slate-200 dark:border-slate-800 text-center">
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-              Demo Environment: All 4 enterprise user roles are pre-configured.<br />
-              Select any role pill above and click <strong>Sign In</strong> to explore.
-            </p>
+          {/* Security & SSO Verification Badge */}
+          <div className="mt-5 pt-4 border-t border-slate-200 dark:border-slate-800 text-center">
+            <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+              <span>Protected by Enterprise TLS 1.3 & Multi-Factor Verification</span>
+            </div>
           </div>
         </div>
 
