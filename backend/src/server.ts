@@ -12,10 +12,10 @@ const startServer = async () => {
     await seedDatabase();
   }
 
-  const server = app.listen(ENV.PORT, () => {
+  const server = app.listen(ENV.PORT, '0.0.0.0', () => {
     console.log('====================================================');
     console.log(`🚀 VendorSphere Enterprise API Server Running`);
-    console.log(`📡 Port: ${ENV.PORT}`);
+    console.log(`📡 Port: ${ENV.PORT} (Host: 0.0.0.0)`);
     console.log(`🌐 Environment: ${ENV.NODE_ENV}`);
     console.log(`🌿 Database: MongoDB Atlas (${isDbConnected ? 'Connected' : 'Disconnected / Standby'})`);
     console.log(`🔗 Health Check: http://localhost:${ENV.PORT}/api/health`);

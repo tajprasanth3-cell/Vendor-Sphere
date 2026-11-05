@@ -36,6 +36,26 @@ export const createApp = (): Application => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
+  // Root landing endpoint for cloud verification & browser access
+  app.get('/', (_req: Request, res: Response) => {
+    const dbStatus = getDBStatus();
+    res.json({
+      status: 'operational',
+      platform: 'VendorSphere Enterprise API',
+      version: '2.4.0',
+      database: {
+        provider: 'MongoDB Atlas',
+        ...dbStatus,
+      },
+      endpoints: {
+        health: '/api/health',
+        apiV1: '/api/v1',
+      },
+      clientUrl: ENV.CLIENT_URL,
+      timestamp: new Date().toISOString(),
+    });
+  });
+
   // Health check endpoint with MongoDB status
   app.get('/api/health', (_req: Request, res: Response) => {
     const dbStatus = getDBStatus();
