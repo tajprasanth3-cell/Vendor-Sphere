@@ -147,8 +147,8 @@ export const Sidebar: React.FC = () => {
           title="Return to Main Dashboard"
           aria-label="Return to Main Dashboard"
         >
-          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-xs group-hover:scale-105 group-hover:bg-blue-700 transition-all shrink-0">
-            <Boxes className="w-4 h-4 transition-transform group-hover:rotate-6" />
+          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-xs shrink-0">
+            <Boxes className="w-4 h-4" />
           </div>
           <div>
             <span className="font-bold text-sm tracking-tight text-slate-900 dark:text-white block leading-none group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">

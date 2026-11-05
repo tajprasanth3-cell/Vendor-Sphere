@@ -109,7 +109,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateModal }) => {
           title="Return to Main Dashboard"
           aria-label="Return to Main Dashboard"
         >
-          <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-xs group-hover:scale-105 transition-transform shrink-0">
+          <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-xs shrink-0">
             <Boxes className="w-4 h-4" />
           </div>
           <span className="font-bold text-sm tracking-tight text-slate-900 dark:text-white leading-none">
