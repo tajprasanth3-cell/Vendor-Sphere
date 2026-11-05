@@ -131,7 +131,7 @@ export const LoginView: React.FC = () => {
   };
 
   return (
-    <div className="h-screen w-full flex bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 transition-colors duration-200 overflow-y-auto lg:overflow-hidden select-none">
+    <div className="min-h-screen lg:h-screen w-full flex bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 transition-colors duration-200 overflow-y-auto lg:overflow-hidden select-none">
       {/* Left Brand Showcase Column (Desktop Only) */}
       <div className="hidden lg:flex lg:w-5/12 xl:w-1/2 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-950 text-white p-6 xl:p-10 flex-col justify-between relative overflow-hidden border-r border-slate-800 shrink-0">
         {/* Ambient background glow */}
@@ -145,7 +145,7 @@ export const LoginView: React.FC = () => {
           </div>
           <div>
             <span className="text-lg font-bold tracking-tight text-white flex items-center gap-2">
-              VendorSphere
+              Vendor <span className="text-blue-400">Sphere</span>
               <span className="text-[10px] font-semibold bg-blue-500/20 text-blue-300 border border-blue-400/30 px-2 py-0.2 rounded-full">
                 v2.4 Enterprise
               </span>
@@ -211,21 +211,28 @@ export const LoginView: React.FC = () => {
       </div>
 
       {/* Right Authentication Form Column */}
-      <div className="flex-1 flex flex-col justify-between p-4 sm:p-6 md:p-8 relative min-w-0">
+      <div className="flex-1 flex flex-col justify-between p-3.5 sm:p-6 md:p-8 relative min-w-0 min-h-screen lg:min-h-0 overflow-y-auto">
         {/* Top Bar on Right side */}
-        <div className="flex items-center justify-between w-full">
+        <div className="flex items-center justify-between w-full max-w-md mx-auto mb-2 sm:mb-4 shrink-0">
           {/* Mobile Logo on small screens */}
-          <div className="flex items-center gap-2 lg:hidden">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-xs">
-              <Boxes className="w-4 h-4 text-white" />
+          <div className="flex items-center gap-2.5 lg:hidden">
+            <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-xs shrink-0">
+              <Boxes className="w-4 h-4" />
             </div>
-            <span className="font-bold text-sm text-slate-900 dark:text-white">VendorSphere</span>
+            <div>
+              <span className="font-bold text-sm tracking-tight text-slate-900 dark:text-white block leading-none">
+                Vendor <span className="text-blue-600">Sphere</span>
+              </span>
+              <span className="text-[10px] text-slate-400 font-mono tracking-wider uppercase block mt-0.5">
+                Enterprise SCM
+              </span>
+            </div>
           </div>
 
           <div className="ml-auto">
             <button
               onClick={toggleTheme}
-              className="p-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer border border-slate-200 dark:border-slate-800"
               title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} mode`}
             >
               {theme === 'dark' ? (
@@ -238,22 +245,25 @@ export const LoginView: React.FC = () => {
         </div>
 
         {/* Center Card */}
-        <div className="max-w-md w-full mx-auto my-auto py-2 sm:py-4">
-          <div className="mb-4 space-y-1">
+        <div className="max-w-md w-full mx-auto my-auto py-1 sm:py-3">
+          <div className="mb-3 sm:mb-4 space-y-0.5 sm:space-y-1">
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
               Sign In to Your Workspace
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Select an enterprise persona below or enter your credentials:
+              Select an enterprise persona or enter your credentials:
             </p>
           </div>
 
           {/* Quick Role Demo Accounts Selector Pills */}
-          <div className="space-y-1.5 mb-4">
-            <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
-              Quick Role Demo Accounts:
-            </label>
-            <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-1.5 mb-3 sm:mb-4">
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+                Quick Role Demo Accounts:
+              </label>
+              <span className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold">1-Click Login</span>
+            </div>
+            <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
               {[
                 {
                   role: 'procurement_manager' as UserRole,
@@ -286,19 +296,19 @@ export const LoginView: React.FC = () => {
                     key={p.role}
                     type="button"
                     onClick={() => handleSelectRole(p.role)}
-                    className={`p-2 rounded-lg border text-left transition-all cursor-pointer ${
+                    className={`p-2 sm:p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                       isSelected
                         ? 'bg-blue-50 border-blue-500 dark:bg-blue-500/10 dark:border-blue-500 shadow-xs ring-1 ring-blue-500/30'
                         : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
                     }`}
                   >
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 min-w-0">
                       {p.icon}
                       <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
                         {p.title}
                       </span>
                     </div>
-                    <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate pl-5">
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate pl-5 mt-0.5">
                       {p.name}
                     </div>
                   </button>
@@ -308,7 +318,7 @@ export const LoginView: React.FC = () => {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-3">
+          <form onSubmit={handleSubmit} className="space-y-2.5 sm:space-y-3">
             {error && (
               <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400 text-xs font-medium">
                 {error}
@@ -386,7 +396,7 @@ export const LoginView: React.FC = () => {
               variant="primary"
               size="md"
               loading={isLoading}
-              className="w-full text-xs sm:text-sm font-semibold py-2.5 mt-1"
+              className="w-full text-xs sm:text-sm font-semibold py-2.5 mt-1 min-h-[40px]"
               icon={<ArrowRight className="w-4 h-4" />}
             >
               Sign In to Procurement Workspace
@@ -394,8 +404,8 @@ export const LoginView: React.FC = () => {
           </form>
 
           {/* Quick Note */}
-          <div className="mt-3.5 pt-3 border-t border-slate-200 dark:border-slate-800 text-center">
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+          <div className="mt-3 pt-2.5 sm:mt-3.5 sm:pt-3 border-t border-slate-200 dark:border-slate-800 text-center">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
               Demo Environment: All 4 enterprise user roles are pre-configured.<br />
               Select any role pill above and click <strong>Sign In</strong> to explore.
             </p>
@@ -403,8 +413,8 @@ export const LoginView: React.FC = () => {
         </div>
 
         {/* Footer */}
-        <div className="text-center text-[10px] text-slate-400 dark:text-slate-500 pt-2 shrink-0">
-          VendorSphere Enterprise Procurement • ADZ4NEEDZ Software Challenge • Restricted Access
+        <div className="text-center text-[10px] text-slate-400 dark:text-slate-500 pt-2 sm:pt-3 shrink-0 max-w-md mx-auto w-full">
+          Vendor Sphere Enterprise Procurement • Restricted Access
         </div>
       </div>
 
