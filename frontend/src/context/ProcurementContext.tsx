@@ -226,25 +226,21 @@ export const ProcurementProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [vendors, setVendors] = useState<Vendor[]>(() => getInitialVendors(role));
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(() => getInitialAudits(role));
 
-  // Theme setup with persistence
-  const [theme, setTheme] = useState<ThemeMode>(() => {
-    const saved = localStorage.getItem('vendorsphere_theme');
-    if (saved === 'light' || saved === 'dark') return saved;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  });
+  // Strictly light mode enforcement
+  const theme: ThemeMode = 'light';
 
   useEffect(() => {
     const root = document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
+    root.classList.remove('dark');
+    try {
+      localStorage.setItem('vendorsphere_theme', 'light');
+    } catch {
+      // ignore
     }
-    localStorage.setItem('vendorsphere_theme', theme);
-  }, [theme]);
+  }, []);
 
   const toggleTheme = () => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    // Strictly light mode - dark mode removed
   };
 
   // Centralized Audit Log

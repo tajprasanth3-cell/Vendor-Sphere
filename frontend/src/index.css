@@ -9,12 +9,6 @@
     --color-border: #e2e8f0;
   }
 
-  .dark {
-    --color-bg-primary: #020617;
-    --color-bg-surface: #0f172a;
-    --color-border: #1e293b;
-  }
-
   * {
     border-color: var(--color-border);
     box-sizing: border-box;

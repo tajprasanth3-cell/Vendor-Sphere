@@ -8,8 +8,6 @@ import {
   ShieldCheck, 
   CheckCircle2, 
   ArrowRight, 
-  Sun, 
-  Moon, 
   KeyRound,
   RotateCcw,
   Sparkles,
@@ -20,7 +18,7 @@ import { Button } from '../common/Button';
 import { Modal } from '../common/Modal';
 
 export const LoginView: React.FC = () => {
-  const { login, theme, toggleTheme, forgotPassword, resetPasswordWithOtp } = useProcurement();
+  const { login, forgotPassword, resetPasswordWithOtp } = useProcurement();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -216,20 +214,6 @@ export const LoginView: React.FC = () => {
                 Enterprise SCM
               </span>
             </div>
-          </div>
-
-          <div className="ml-auto">
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer border border-slate-200 dark:border-slate-800"
-              title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} mode`}
-            >
-              {theme === 'dark' ? (
-                <Sun className="w-4 h-4 text-amber-400" />
-              ) : (
-                <Moon className="w-4 h-4 text-slate-700" />
-              )}
-            </button>
           </div>
         </div>
 

@@ -3,8 +3,6 @@ import {
   Search, 
   Plus, 
   Bell, 
-  Sun,
-  Moon,
   Menu,
   LogOut,
   CheckCircle2,
@@ -28,8 +26,6 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateModal }) => {
   const { 
     role, 
-    theme, 
-    toggleTheme, 
     searchQuery, 
     setSearchQuery, 
     setIsMobileSidebarOpen,
@@ -184,22 +180,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCreateModal }) => {
         </div>
       )}
 
-      {/* Right Controls: Theme Toggle, Notifications, User Profile & CTA */}
+      {/* Right Controls: Notifications, User Profile & CTA */}
       <div className="flex items-center gap-1.5 sm:gap-2.5 ml-auto">
-        {/* Light / Dark Mode Toggle */}
-        <button
-          onClick={toggleTheme}
-          className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
-          title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Theme`}
-          aria-label="Toggle theme"
-        >
-          {theme === 'dark' ? (
-            <Sun className="w-4 h-4 text-amber-400" />
-          ) : (
-            <Moon className="w-4 h-4 text-slate-700" />
-          )}
-        </button>
-
         {/* Create Purchase Requisition CTA */}
         <Button
           variant="primary"
