@@ -11,7 +11,8 @@ import {
   KeyRound,
   RotateCcw,
   Sparkles,
-  AlertCircle
+  AlertCircle,
+  Users
 } from 'lucide-react';
 import { useProcurement } from '../../context/ProcurementContext';
 import { Button } from '../common/Button';
@@ -38,20 +39,45 @@ export const LoginView: React.FC = () => {
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotError, setForgotError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) {
+    const cleanEmail = email.trim();
+    const cleanPassword = password.trim();
+
+    if (!cleanEmail) {
       setError('Please provide your corporate email address.');
+      return;
+    }
+
+    if (!cleanEmail.includes('@') || !cleanEmail.includes('.')) {
+      setError('Please enter a valid corporate email format (e.g., name@enterprise.internal).');
+      return;
+    }
+
+    if (!cleanPassword) {
+      setError('Please provide your corporate password.');
+      return;
+    }
+
+    if (cleanPassword.length < 4) {
+      setError('Password must be at least 4 characters long.');
       return;
     }
 
     setIsLoading(true);
     setError(null);
 
-    setTimeout(() => {
-      login(email, password);
+    try {
+      const success = await login(cleanEmail, cleanPassword);
+      if (!success) {
+        setError('Authentication failed. Please verify your credentials or select a test account below.');
+        setIsLoading(false);
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Authentication failed. Please try again.';
+      setError(message);
       setIsLoading(false);
-    }, 350);
+    }
   };
 
   const handleOpenForgotModal = () => {
@@ -81,7 +107,7 @@ export const LoginView: React.FC = () => {
       } else {
         setForgotError(res.message);
       }
-    } catch (err) {
+    } catch {
       setForgotError('Failed to send reset code. Please try again.');
     } finally {
       setForgotLoading(false);
@@ -110,17 +136,23 @@ export const LoginView: React.FC = () => {
       } else {
         setForgotError(res.message);
       }
-    } catch (err) {
+    } catch {
       setForgotError('Password reset failed. Please verify code.');
     } finally {
       setForgotLoading(false);
     }
   };
 
+  const handleSelectTestAccount = (accEmail: string) => {
+    setEmail(accEmail);
+    setPassword('password123');
+    setError(null);
+  };
+
   return (
-    <div className="min-h-screen lg:h-screen w-full flex bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 transition-colors duration-200 overflow-y-auto lg:overflow-hidden select-none">
+    <div className="min-h-screen lg:h-screen w-full flex bg-slate-50 font-sans text-slate-900 overflow-y-auto lg:overflow-hidden">
       {/* Left Brand Showcase Column (Desktop Only) */}
-      <div className="hidden lg:flex lg:w-5/12 xl:w-1/2 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-950 text-white p-6 xl:p-10 flex-col justify-between relative overflow-hidden border-r border-slate-800 shrink-0">
+      <div className="hidden lg:flex lg:w-5/12 xl:w-1/2 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-950 text-white p-6 xl:p-10 flex-col justify-between relative overflow-hidden border-r border-slate-800 shrink-0 select-none">
         {/* Ambient background glow */}
         <div className="absolute top-0 right-0 w-80 h-80 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none" />
@@ -137,7 +169,7 @@ export const LoginView: React.FC = () => {
                 v2.4 Enterprise
               </span>
             </span>
-            <p className="text-[11px] text-slate-400">Vendor & Procurement Management Platform</p>
+            <p className="text-[11px] text-slate-400">Institutional Procurement & Supplier Governance</p>
           </div>
         </div>
 
@@ -145,7 +177,7 @@ export const LoginView: React.FC = () => {
         <div className="relative z-10 space-y-4 my-auto py-4">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-500/10 text-blue-300 border border-blue-500/20">
             <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
-            Institutional Procurement & Supplier Governance
+            Enterprise Supply Chain Governance
           </div>
 
           <h1 className="text-2xl xl:text-3xl font-extrabold tracking-tight text-white leading-tight">
@@ -156,7 +188,7 @@ export const LoginView: React.FC = () => {
             Unify requisitions, multi-tier authorizations, competitive quotation tendering, Purchase Orders, and automated 3-way matching in a single verified platform.
           </p>
 
-          {/* Core Feature Pillars in Compact 2x2 Grid */}
+          {/* Core Feature Pillars */}
           <div className="grid grid-cols-2 gap-2.5 pt-2">
             {[
               {
@@ -198,16 +230,15 @@ export const LoginView: React.FC = () => {
       </div>
 
       {/* Right Authentication Form Column */}
-      <div className="flex-1 flex flex-col justify-between p-3.5 sm:p-6 md:p-8 relative min-w-0 min-h-screen lg:min-h-0 overflow-y-auto">
-        {/* Top Bar on Right side */}
+      <div className="flex-1 flex flex-col justify-between p-4 sm:p-6 md:p-8 relative min-w-0 min-h-screen lg:min-h-0 overflow-y-auto bg-slate-50">
+        {/* Top Header on Right side (Mobile branding & status) */}
         <div className="flex items-center justify-between w-full max-w-md mx-auto mb-2 sm:mb-4 shrink-0">
-          {/* Mobile Logo on small screens */}
           <div className="flex items-center gap-2.5 lg:hidden">
             <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-xs shrink-0">
               <Boxes className="w-4 h-4" />
             </div>
             <div>
-              <span className="font-bold text-sm tracking-tight text-slate-900 dark:text-white block leading-none">
+              <span className="font-bold text-sm tracking-tight text-slate-900 block leading-none">
                 Vendor <span className="text-blue-600">Sphere</span>
               </span>
               <span className="text-[10px] text-slate-400 font-mono tracking-wider uppercase block mt-0.5">
@@ -215,55 +246,66 @@ export const LoginView: React.FC = () => {
               </span>
             </div>
           </div>
+          <div className="hidden lg:flex items-center gap-1.5 ml-auto text-[11px] text-emerald-600 font-semibold bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Secure Portal Ready</span>
+          </div>
         </div>
 
         {/* Center Card */}
-        <div className="max-w-md w-full mx-auto my-auto py-2 sm:py-6">
-          <div className="mb-5 sm:mb-6 space-y-1 sm:space-y-1.5 text-left">
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+        <div className="max-w-md w-full mx-auto my-auto py-2 sm:py-4">
+          <div className="mb-4 sm:mb-5 space-y-1 text-left">
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
               Sign In to Your Workspace
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+            <p className="text-xs sm:text-sm text-slate-500">
               Enter your corporate credentials to access the procurement portal:
             </p>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-3.5">
             {error && (
-              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400 text-xs font-medium">
-                {error}
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-start gap-2 animate-in fade-in duration-150">
+                <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                <span>{error}</span>
               </div>
             )}
 
             {/* Email Field */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <div className="space-y-1">
+              <label htmlFor="email" className="text-xs font-semibold text-slate-700 block">
                 Corporate Email Address
               </label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
+                  id="email"
+                  name="email"
                   type="email"
+                  autoComplete="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (error) setError(null);
+                  }}
                   placeholder="name@enterprise.internal"
-                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-xs"
+                  className="w-full bg-white border border-slate-300 rounded-xl pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-xs"
                 />
               </div>
             </div>
 
             {/* Password Field */}
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               <div className="flex items-center justify-between text-xs">
-                <label className="font-semibold text-slate-700 dark:text-slate-300">
+                <label htmlFor="password" className="font-semibold text-slate-700 block">
                   Password
                 </label>
                 <button
                   type="button"
                   onClick={handleOpenForgotModal}
-                  className="text-blue-600 dark:text-blue-400 hover:underline text-[11px] sm:text-xs font-semibold cursor-pointer"
+                  className="text-blue-600 hover:underline text-[11px] sm:text-xs font-semibold cursor-pointer"
                 >
                   Forgot Password?
                 </button>
@@ -271,17 +313,24 @@ export const LoginView: React.FC = () => {
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
+                  id="password"
+                  name="password"
                   type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
                   required
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (error) setError(null);
+                  }}
                   placeholder="Enter enterprise credentials"
-                  className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl pl-10 pr-10 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-xs"
+                  className="w-full bg-white border border-slate-300 rounded-xl pl-10 pr-10 py-2.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-xs"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer p-0.5"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -297,7 +346,7 @@ export const LoginView: React.FC = () => {
                   onChange={(e) => setRememberMe(e.target.checked)}
                   className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                 />
-                <span className="text-slate-600 dark:text-slate-400 text-xs">Remember session on this device</span>
+                <span className="text-slate-600 text-xs">Remember session on this device</span>
               </label>
             </div>
 
@@ -307,24 +356,63 @@ export const LoginView: React.FC = () => {
               variant="primary"
               size="md"
               loading={isLoading}
-              className="w-full text-xs sm:text-sm font-semibold py-2.5 sm:py-3 mt-1.5 min-h-[42px] rounded-xl shadow-sm shadow-blue-600/20"
+              className="w-full text-xs sm:text-sm font-semibold py-2.5 sm:py-3 mt-1 min-h-[42px] rounded-xl shadow-sm shadow-blue-600/20"
               icon={<ArrowRight className="w-4 h-4" />}
             >
               Sign In to Procurement Workspace
             </Button>
           </form>
 
+          {/* Team Demo & Reviewer Accounts Helper */}
+          <div className="mt-4 p-3 rounded-xl bg-slate-100/90 border border-slate-200 text-left">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-blue-600" />
+                Team Reviewer Test Accounts
+              </span>
+              <span className="text-[10px] font-mono text-slate-500 bg-white px-1.5 py-0.5 rounded border border-slate-200">
+                PWD: password123
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-1.5">
+              {[
+                { role: 'Procurement Manager', email: 'elena.rostova@enterprise.internal' },
+                { role: 'Dept Requester', email: 's.jenkins@enterprise.internal' },
+                { role: 'Administrator', email: 'admin@enterprise.internal' },
+                { role: 'Vendor Partner', email: 'dvance@apexcloud.io' },
+              ].map((acc) => (
+                <button
+                  key={acc.email}
+                  type="button"
+                  onClick={() => handleSelectTestAccount(acc.email)}
+                  className="p-1.5 rounded-lg bg-white border border-slate-200 hover:border-blue-400 hover:bg-blue-50/40 transition-all text-left cursor-pointer group"
+                  title={`Click to fill ${acc.role} credentials`}
+                >
+                  <div className="font-semibold text-slate-800 text-[11px] group-hover:text-blue-600 truncate leading-tight">
+                    {acc.role}
+                  </div>
+                  <div className="text-[9.5px] text-slate-500 font-mono truncate leading-tight mt-0.5">
+                    {acc.email}
+                  </div>
+                </button>
+              ))}
+            </div>
+            <p className="text-[9.5px] text-slate-500 mt-2 text-center">
+              Click any account above to autofill credentials for instant review.
+            </p>
+          </div>
+
           {/* Security & SSO Verification Badge */}
-          <div className="mt-5 pt-4 border-t border-slate-200 dark:border-slate-800 text-center">
-            <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+          <div className="mt-4 pt-3 border-t border-slate-200 text-center">
+            <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-500 font-medium">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
               <span>Protected by Enterprise TLS 1.3 & Multi-Factor Verification</span>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="text-center text-[10px] text-slate-400 dark:text-slate-500 pt-2 sm:pt-3 shrink-0 max-w-md mx-auto w-full">
+        <div className="text-center text-[10px] text-slate-400 pt-2 sm:pt-3 shrink-0 max-w-md mx-auto w-full">
           Vendor Sphere Enterprise Procurement • Restricted Access
         </div>
       </div>
@@ -338,38 +426,39 @@ export const LoginView: React.FC = () => {
           subtitle="Corporate identity verification and credential reset workflow."
           maxWidth="md"
         >
-          <div className="space-y-4 text-xs text-slate-800 dark:text-slate-200">
+          <div className="space-y-4 text-xs text-slate-800">
             {/* Step 1: Enter corporate email */}
             {forgotStep === 1 && (
               <form onSubmit={handleSendResetCode} className="space-y-3.5">
-                <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-xs">
+                <p className="text-slate-600 leading-relaxed text-xs">
                   Enter your registered institutional email. We will generate and dispatch a secure 6-digit verification code.
                 </p>
 
                 {forgotError && (
-                  <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 dark:bg-rose-500/10 dark:border-rose-500/20 text-xs font-medium">
+                  <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium">
                     {forgotError}
                   </div>
                 )}
 
                 <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                  <label htmlFor="forgot-email" className="text-[11px] font-semibold text-slate-700 block">
                     Corporate Email
                   </label>
                   <div className="relative">
                     <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                     <input
+                      id="forgot-email"
                       type="email"
                       required
                       value={forgotEmail}
                       onChange={(e) => setForgotEmail(e.target.value)}
                       placeholder="name@enterprise.internal"
-                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg pl-9 pr-3 py-2 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="w-full bg-slate-50 border border-slate-300 rounded-lg pl-9 pr-3 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+                <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
                   <Button
                     type="button"
                     variant="outline"
@@ -395,12 +484,12 @@ export const LoginView: React.FC = () => {
             {forgotStep === 2 && (
               <form onSubmit={handleConfirmReset} className="space-y-3.5">
                 {/* Simulated Email Delivery Pill */}
-                <div className="p-3 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/40 rounded-xl space-y-1">
-                  <div className="flex items-center gap-1.5 text-blue-700 dark:text-blue-300 font-bold text-xs">
-                    <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl space-y-1">
+                  <div className="flex items-center gap-1.5 text-blue-700 font-bold text-xs">
+                    <Sparkles className="w-4 h-4 text-blue-600 shrink-0" />
                     <span>Demo Challenge Notification:</span>
                   </div>
-                  <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                  <p className="text-[11px] text-slate-600">
                     A verification code has been dispatched to <strong>{forgotEmail}</strong>.
                   </p>
                   <div className="pt-1 flex items-center justify-between">
@@ -408,7 +497,7 @@ export const LoginView: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setEnteredOtp(generatedOtp)}
-                      className="font-mono text-xs font-bold text-blue-600 dark:text-blue-400 bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-blue-300 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/40 cursor-pointer"
+                      className="font-mono text-xs font-bold text-blue-600 bg-white px-2 py-0.5 rounded border border-blue-300 hover:bg-blue-100 cursor-pointer"
                       title="Click to auto-fill OTP"
                     >
                       {generatedOtp} (Click to Fill)
@@ -417,55 +506,58 @@ export const LoginView: React.FC = () => {
                 </div>
 
                 {forgotError && (
-                  <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 dark:bg-rose-500/10 dark:border-rose-500/20 text-xs font-medium">
+                  <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium">
                     {forgotError}
                   </div>
                 )}
 
                 <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                  <label htmlFor="otp-input" className="text-[11px] font-semibold text-slate-700 block">
                     Enter 6-Digit Code *
                   </label>
                   <input
+                    id="otp-input"
                     type="text"
                     required
                     maxLength={6}
                     value={enteredOtp}
                     onChange={(e) => setEnteredOtp(e.target.value)}
                     placeholder="e.g. 123456"
-                    className="w-full tracking-widest text-center font-mono font-bold bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="w-full tracking-widest text-center font-mono font-bold bg-slate-50 border border-slate-300 rounded-lg py-2 text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                  <label htmlFor="new-password" className="text-[11px] font-semibold text-slate-700 block">
                     New Secure Password *
                   </label>
                   <div className="relative">
                     <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                     <input
+                      id="new-password"
                       type={showNewPassword ? 'text' : 'password'}
                       required
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder="Minimum 6 characters"
-                      className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg pl-9 pr-9 py-2 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="w-full bg-slate-50 border border-slate-300 rounded-lg pl-9 pr-9 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                     <button
                       type="button"
                       onClick={() => setShowNewPassword(!showNewPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                      aria-label={showNewPassword ? 'Hide password' : 'Show password'}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
                     >
                       {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
 
-                <div className="flex justify-between items-center pt-2 border-t border-slate-200 dark:border-slate-800">
+                <div className="flex justify-between items-center pt-2 border-t border-slate-200">
                   <button
                     type="button"
                     onClick={() => setForgotStep(1)}
-                    className="text-[11px] text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 flex items-center gap-1 cursor-pointer"
+                    className="text-[11px] text-slate-500 hover:text-slate-800 flex items-center gap-1 cursor-pointer"
                   >
                     <RotateCcw className="w-3 h-3" />
                     <span>Change email</span>
@@ -486,14 +578,14 @@ export const LoginView: React.FC = () => {
             {/* Step 3: Success Confirmation */}
             {forgotStep === 3 && (
               <div className="text-center py-4 space-y-3">
-                <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 flex items-center justify-center mx-auto text-emerald-600 dark:text-emerald-400">
+                <div className="w-12 h-12 rounded-full bg-emerald-100 border border-emerald-300 flex items-center justify-center mx-auto text-emerald-600">
                   <CheckCircle2 className="w-6 h-6" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                  <h4 className="text-sm font-bold text-slate-900">
                     Password Successfully Updated!
                   </h4>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  <p className="text-xs text-slate-500 mt-1">
                     Your credentials have been securely refreshed. Your password field on the login screen has been automatically updated.
                   </p>
                 </div>

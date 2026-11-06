@@ -12,7 +12,6 @@ import {
 } from 'lucide-react';
 import { useProcurement } from '../../context/ProcurementContext';
 import { APP_CONFIG } from '../../config';
-import { UserRole } from '../../types';
 
 interface NavItem {
   id: string;
